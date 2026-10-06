@@ -1,0 +1,614 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>OMRON IQ & ECG Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap">
+<style>
+/* Layout: report header with a campaign timeline, then one section at a time behind
+   a four-way switch: Overall, KPI progress, Budget, Detail. One blue ramp carries all data;
+   status colours appear only on achievement chips. */
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10); --chip:#f0efec;
+  --fill:#2a78d6; --track:#cde2fb;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --tip-bg:#0b0b0b; --tip-ink:#ffffff;
+  --font:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --chip:#2c2c2a;
+    --fill:#3987e5; --track:#184f95;
+    --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+    --tip-bg:#ffffff; --tip-ink:#0b0b0b; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10); --chip:#2c2c2a;
+  --fill:#3987e5; --track:#184f95;
+  --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+  --tip-bg:#ffffff; --tip-ink:#0b0b0b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3,p{margin:0}
+h1{font-size:28px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:17px;font-weight:600}
+h3{font-size:14px;font-weight:600}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+.sub{color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+.head{display:flex;flex-direction:column;gap:14px}
+.head-top{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:flex-end}
+.head-title{display:flex;flex-direction:column;gap:4px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--ink-2);font-size:13px}
+.meta b{color:var(--ink);font-weight:500}
+.timeline{display:flex;flex-direction:column;gap:6px}
+.tl-bar{position:relative;height:10px;border-radius:5px;background:var(--track);overflow:visible}
+.tl-fill{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:5px 0 0 5px}
+.tl-now{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.tl-months{display:grid;font-size:12px;color:var(--ink-2)}
+.tl-months span{border-left:1px solid var(--axis);padding-left:5px;white-space:nowrap;overflow:hidden}
+
+/* section switch */
+.tabs,.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--chip);border-radius:10px;padding:4px;align-self:flex-start;max-width:100%}
+.tabs button,.seg button{font:inherit;font-weight:500;color:var(--ink-2);background:transparent;border:1px solid transparent;border-radius:7px;padding:8px 16px;cursor:pointer;white-space:nowrap}
+.seg button{padding:5px 12px;font-size:13px}
+.tabs button:hover,.seg button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"],.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);border-color:var(--border)}
+.tabs button:focus-visible,.seg button:focus-visible{outline:2px solid var(--fill);outline-offset:1px}
+.fine{font-size:12.5px;color:var(--ink-2);max-width:78ch}
+
+/* sections */
+.section{display:flex;flex-direction:column;gap:12px}
+.section-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;min-width:0}
+
+/* overall tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;gap:6px}
+.tile-label{font-size:13px;color:var(--ink-2);font-weight:500}
+.tile-value{font-size:40px;font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.tile-of{color:var(--ink-2);font-size:13px}
+.tile-foot{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:13px;color:var(--ink-2)}
+.tile-foot strong{color:var(--ink);font-weight:600;font-size:15px}
+.meter{position:relative;height:10px;border-radius:5px;background:var(--track);margin-block:6px 2px}
+.meter-fill{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:5px;min-width:0}
+.meter-mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;padding:0}
+.strip div{padding:12px 18px;display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--grid)}
+.strip div:last-child{border-right:0}
+.strip .k{font-size:12px;color:var(--ink-2)}
+.strip .v{font-size:18px;font-weight:600}
+
+.channels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.channels .tile-value{font-size:28px}
+
+/* two-column */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:860px){.split{grid-template-columns:minmax(0,1fr)}}
+.stack{display:flex;flex-direction:column;gap:16px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);align-items:center}
+.sw{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.sw.plan{background:var(--track)} .sw.used{background:var(--fill)}
+.sw.now{width:2px;height:12px;background:var(--ink);border-radius:0}
+
+/* KPI rows */
+.kpi{display:flex;flex-direction:column;gap:4px;padding-block:12px;border-top:1px solid var(--grid)}
+.kpi:first-of-type{border-top:0;padding-top:0}
+.kpi-top{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;align-items:baseline}
+.kpi-name{font-weight:600}
+.kpi-name small{font-weight:400;color:var(--ink-2);font-size:13px;margin-left:6px}
+.kpi-val{font-size:13px;color:var(--ink-2)}
+.kpi-val strong{color:var(--ink);font-size:15px;font-weight:600}
+.kpi-note{font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--chip);color:var(--ink);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:500;white-space:nowrap}
+.chip i{font-style:normal;width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip.good i{background:var(--good)} .chip.warn i{background:var(--warn)} .chip.crit i{background:var(--crit)} .chip.idle i{background:var(--muted)}
+
+/* monthly column chart */
+.chart{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 6px}
+.yaxis{position:relative;height:210px;font-size:11px;color:var(--ink-2)}
+.yaxis span{position:absolute;right:0;transform:translateY(50%);white-space:nowrap}
+.plot{position:relative;height:210px;border-bottom:1px solid var(--axis)}
+.gridline{position:absolute;left:0;right:0;height:1px;background:var(--grid)}
+.cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;cursor:default;outline:0}
+.col .cap{font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.col .bar{position:relative;width:24px;max-width:70%;background:var(--track);border-radius:4px 4px 0 0}
+.col .usedbar{position:absolute;left:0;right:0;bottom:0;background:var(--fill);border-radius:4px 4px 0 0}
+.col:hover .bar,.col:focus-visible .bar{filter:brightness(.93)}
+.col:focus-visible .cap{text-decoration:underline}
+.xaxis{grid-column:2;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));font-size:11.5px;color:var(--ink-2);text-align:center;padding-top:6px}
+
+/* tables */
+.tablebox{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--grid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;font-weight:500;color:var(--ink-2);white-space:nowrap;background:var(--surface)}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td .l2{display:block;color:var(--ink-2);font-size:12px}
+tbody td:first-child{white-space:nowrap}
+#audTable tbody td:first-child{white-space:normal;min-width:150px}
+.kpicell .num{white-space:nowrap}
+tfoot td{font-weight:600;border-top:1px solid var(--axis)}
+.cellbar{height:4px;border-radius:2px;background:var(--track);margin-top:5px;position:relative;min-width:90px}
+.cellbar b{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:2px}
+.kpicell{display:flex;flex-direction:column;gap:3px;min-width:150px}
+.kpicell .line{display:flex;gap:8px;justify-content:space-between;align-items:center}
+a{color:var(--fill);text-underline-offset:2px}
+a:focus-visible,.col:focus-visible{outline:2px solid var(--fill);outline-offset:2px;border-radius:4px}
+.notes{font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px;max-width:78ch;padding-left:18px;margin:0}
+#tip{position:fixed;z-index:10;pointer-events:none;background:var(--tip-bg);color:var(--tip-ink);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:240px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#tip b{display:block;font-size:13px}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="head-top">
+      <div class="head-title">
+        <span class="eyebrow">Digital campaign report</span>
+        <h1>IQ &amp; ECG Campaign 2026</h1>
+      </div>
+      <div class="meta">
+        <span><b>Client</b> OMRON</span>
+        <span><b>Agency</b> Hedima</span>
+        <span><b>Channels</b> Facebook, TikTok</span>
+        <span><b>Period</b> 1 Sep 2026 to 31 Mar 2027</span>
+        <span><b>Data as of</b> <span id="asof"></span></span>
+      </div>
+    </div>
+    <div class="timeline" aria-label="Campaign timeline">
+      <div class="tl-bar"><div class="tl-fill" id="tlFill"></div><div class="tl-now" id="tlNow"></div></div>
+      <div class="tl-months" id="tlMonths"></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Dashboard sections" id="tabs">
+    <button type="button" role="tab" id="tab-overall" data-panel="overall" aria-selected="true">Overall</button>
+    <button type="button" role="tab" id="tab-kpi" data-panel="kpi" aria-selected="false">KPI progress</button>
+    <button type="button" role="tab" id="tab-budget" data-panel="budget" aria-selected="false">Budget</button>
+    <button type="button" role="tab" id="tab-detail" data-panel="detail" aria-selected="false">Detail</button>
+  </nav>
+
+  <section class="section" id="panel-overall" role="tabpanel" aria-labelledby="tab-overall">
+    <div class="section-head"><h2>Overall</h2><span class="sub" id="overallNote"></span></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card strip" id="strip"></div>
+    <div class="legend"><span><span class="sw used"></span>Delivered</span><span><span class="sw plan"></span>Total</span><span><span class="sw now"></span>Time elapsed</span></div>
+  </section>
+
+  <section class="section" id="panel-kpi" role="tabpanel" aria-labelledby="tab-kpi" hidden>
+    <div class="section-head">
+      <h2>KPI progress</h2>
+      <div class="legend"><span><span class="sw used"></span>Delivered</span><span><span class="sw plan"></span>Committed KPI</span><span><span class="sw now"></span>Time elapsed</span></div>
+    </div>
+    <div class="card"><div id="kpis"></div></div>
+  </section>
+
+  <section class="section" id="panel-budget" role="tabpanel" aria-labelledby="tab-budget" hidden>
+    <div class="section-head">
+      <h2>Budget</h2>
+      <div class="legend"><span><span class="sw used"></span>Used</span><span><span class="sw plan"></span>Planned</span></div>
+    </div>
+    <div class="channels" id="channels"></div>
+    <div class="split">
+      <div class="card stack">
+        <div>
+          <h3>Planned and used budget by month</h3>
+          <p class="sub" style="font-size:12.5px">Million VND</p>
+        </div>
+        <div class="chart">
+          <div class="yaxis" id="yaxis"></div>
+          <div class="plot" id="plot"><div class="cols" id="cols"></div></div>
+          <div class="xaxis" id="xaxis"></div>
+        </div>
+      </div>
+      <div class="tablebox"><table id="buyTable"></table></div>
+    </div>
+    <p class="fine">Budget used follows the KPI delivered, capped at the planned KPI.</p>
+  </section>
+
+  <section class="section" id="panel-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+    <div class="section-head">
+      <h2>Detail</h2>
+      <div class="seg" role="tablist" aria-label="Detail views" id="subtabs">
+        <button type="button" role="tab" id="sub-tab-posts" data-panel="posts" aria-selected="true">Posts delivered</button>
+        <button type="button" role="tab" id="sub-tab-months" data-panel="months" aria-selected="false">Month by month</button>
+        <button type="button" role="tab" id="sub-tab-breakdown" data-panel="breakdown" aria-selected="false">Product and audience</button>
+      </div>
+    </div>
+    <div class="section" id="sub-posts" role="tabpanel" aria-labelledby="sub-tab-posts">
+      <div class="tablebox"><table id="postTable"></table></div>
+      <p class="fine">CTR is all clicks divided by impressions. Engagement rate is engagements divided by impressions.</p>
+    </div>
+    <div class="section" id="sub-months" role="tabpanel" aria-labelledby="sub-tab-months" hidden>
+      <div class="tablebox"><table id="monthTable"></table></div>
+    </div>
+    <div class="split" id="sub-breakdown" role="tabpanel" aria-labelledby="sub-tab-breakdown" hidden>
+      <div class="tablebox"><table id="prodTable"></table></div>
+      <div class="tablebox"><table id="audTable"></table></div>
+    </div>
+  </section>
+</div>
+<div id="tip" hidden></div>
+
+<script id="model">
+/* ---------- data: snapshot of the campaign report sheet ---------- */
+const CAMPAIGN = { start: '2026-09-01', end: '2027-03-31', asOf: '2026-10-06' };
+const RATE = { 'Impression': 28, 'Click': 4500, 'Thruplay': 220, 'View 2s': 60 };
+const MONTHS = ['2026-09','2026-10','2026-11','2026-12','2027-01','2027-02','2027-03'];
+const BUYS = ['Impression','Thruplay','Click','View 2s'];
+// KPI and budget committed to the client, per channel and buying type
+const SOLD = {
+  'Impression': { kpi: 12500000, budget: 350000000 },
+  'Thruplay':   { kpi: 500000,   budget: 110000000 },
+  'Click':      { kpi: 80000,    budget: 360000000 },
+  'View 2s':    { kpi: 1500000,  budget: 90000000 }
+};
+const BUY_LABEL = {
+  'Impression': ['Impressions','Facebook'],
+  'Click': ['Clicks','Facebook'],
+  'Thruplay': ['ThruPlays','Facebook HCP videos'],
+  'View 2s': ['2-second views','TikTok']
+};
+// [post, month, product, format]
+const SOCIAL = [
+  [1,'2026-09','IQBT','Single'],[2,'2026-09','Complete','Single'],[3,'2026-09','7383T1','Single'],
+  [29,'2026-09','Promotion','Single'],[4,'2026-09','Complete, 1L, 6L','Album'],
+  [5,'2026-10','IQBT','Single'],[6,'2026-10','ECG 1L','Single'],[7,'2026-10','Complete','Album'],
+  [8,'2026-10','IQBT + 7383T1','Album'],[9,'2026-10','ECG 6L','Album'],[10,'2026-10','ECG 1L','Album'],
+  [11,'2026-11','Complete, 1L, 6L','Album'],[12,'2026-11','7383T1','GIF'],[13,'2026-11','IQBT','GIF'],[14,'2026-11','IQBT','Album'],
+  [15,'2026-12','7383T1','Single'],[16,'2026-12','IQBT','Album'],[17,'2026-12','IQBT','GIF'],[18,'2026-12','IQBT','Album'],
+  [19,'2027-01','7383T1','Single'],[20,'2027-01','IQBT','Single'],[21,'2027-01','IQBT','Album'],[22,'2027-01','Complete','Album'],
+  [23,'2027-02','IQBT','Single'],[24,'2027-02','ECG 6L','Album'],[25,'2027-02','7383T1','GIF'],[26,'2027-02','IQBT','Single'],
+  [27,'2027-03','ECG 6L','GIF'],[28,'2027-03','ECG 1L','Album']
+];
+const NO_CLICK = [4];
+const TIKTOK_POSTS = [12,13,17,25,27];
+// delivered ad sets: key = type|post|buy -> [User, Caregiver], each [results, impressions, clicksAll, linkClicks, engagements, budgetUsed]
+const ACTUAL = {
+  'Social post|1|Click':       [[1532,48820,1532,1455,2047,6430500],[1468,43795,1468,1439,1666,6430500]],
+  'Social post|1|Impression':  [[169998,169998,481,179,242,4550000],[163487,163487,370,107,167,4550000]],
+  'Social post|2|Click':       [[1495,48786,1495,1465,1709,6430500],[1490,41783,1490,1421,1614,6430500]],
+  'Social post|2|Impression':  [[168338,168338,548,178,238,4550000],[164206,164206,529,191,228,4550000]],
+  'Social post|3|Click':       [[1471,36105,1471,1380,1673,6430500],[1443,23920,1443,1003,1066,6430500]],
+  'Social post|3|Impression':  [[172687,172687,713,208,374,4550000],[170734,170734,798,345,415,4550000]],
+  'Social post|29|Impression': [[173948,173948,715,290,403,4550000],[164988,164988,476,189,262,4550000]],
+  'Social post|29|Click':      [[1478,39746,1478,1390,1477,6430500],[1472,41260,1472,1307,1917,6430500]],
+  'Social post|4|Impression':  [[181831,181831,641,0,251,4550000],[174370,174370,495,2,202,4550000]],
+  'Social post|5|Click':       [[0,0,0,0,0,0],[605,11780,713,605,637,2722500]],
+  'Social post|5|Impression':  [[150225,150225,446,166,257,4206300],[164615,164615,609,218,282,4550000]],
+  'Social post|6|Click':       [[1605,59182,2203,1605,2056,6430500],[1272,43788,1559,1272,1441,5724000]],
+  'Social post|6|Impression':  [[176188,176188,759,344,429,4550000],[181803,181803,802,396,494,4550000]]
+};
+// post -> link to the published post
+const POST_LINK = {
+  '1':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid02CCV69URaG21VRAxSRJET8d2qN1WAmAcypFaJ1gGTueBQdjemdstocNznMDV6Qykl',
+  '2':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0ZGGtkNMYbrz7KFUHwgkqc2wh7FUxLxXAnJrBb6FQTTav5ADmvBV29XUbUoABTeVhl',
+  '3':  'https://www.facebook.com/photo/?fbid=1370726258542116&set=a.585043720443711',
+  '29': 'https://www.facebook.com/omronhealthcarevn/posts/pfbid0tC4aXpTugm7H9p4V5vaWiMjkEg8GZF8QtwoeoSGkkPRVLXDENohPZBHtZ71JN8CKl',
+  '4':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0t9Z6D3Du3hDAVF25XqmDMmGeHdZ6gUC878ddrnwWaJWzgAMaVo8D2UfpEekgLRKnl',
+  '6':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0mx2ztKv2Y3EZ88kGSuysvGg43FmScC2mRFMJFTKVrrftmxM3aDhJoQ3uDe2W87erl'
+};
+
+/* ---------- model ---------- */
+function buildRows() {
+  const rows = [];
+  const add = (month, product, channel, buy, format, type, post, plan) =>
+    rows.push({ month, product, channel, buy, format, type, post: String(post), plan });
+  for (const [post, month, product, format] of SOCIAL) {
+    const clickKpi = (post >= 17 && post <= 28) ? 2856 : 2858;
+    if (!NO_CLICK.includes(post)) add(month, product, 'Facebook', 'Click', format, 'Social post', post, clickKpi);
+    add(month, product, 'Facebook', 'Impression', format, 'Social post', post, 325000);
+    if (TIKTOK_POSTS.includes(post)) add(month, product, 'TikTok', 'View 2s', format, 'Social post', post, 75000);
+  }
+  for (const [post, month] of [[1,'2026-10'],[2,'2026-10'],[3,'2026-10'],[4,'2026-11']])
+    add(month, 'None', 'Facebook', 'Thruplay', 'Video', 'HCP', post, 125000);
+  add('2026-11', 'None', 'Facebook', 'Impression', 'Video', 'HCP', 5, 300000);
+  for (const [post, month] of [[1,'2026-10'],[2,'2026-10'],[3,'2026-10'],[4,'2026-11'],[5,'2026-11']])
+    add(month, 'None', 'TikTok', 'View 2s', 'Video', 'HCP', post, 75000);
+  for (let p = 1; p <= 9; p++) {
+    const month = p <= 5 ? '2026-10' : '2026-11';
+    add(month, 'None', 'Facebook', 'Impression', 'Video', 'Cut Video', p, p <= 6 ? 308334 : 308332);
+    add(month, 'None', 'TikTok', 'View 2s', 'Video', 'Cut Video', p, p <= 6 ? 83334 : 83332);
+  }
+  for (const r of rows) {
+    r.budget = r.plan * RATE[r.buy];
+    const a = ACTUAL[r.type + '|' + r.post + '|' + r.buy];
+    if (a) {
+      const f = i => a[0][i] + a[1][i];
+      r.actual = { results: f(0), impr: f(1), clicks: f(2), link: f(3), eng: f(4), used: f(5), ta: { User: a[0], Caregiver: a[1] } };
+    } else r.actual = null;
+  }
+  return rows;
+}
+function dayNumber(iso) { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 86400000; }
+function buildModel() {
+  const rows = buildRows();
+  const totalDays = dayNumber(CAMPAIGN.end) - dayNumber(CAMPAIGN.start) + 1;
+  const elapsedDays = dayNumber(CAMPAIGN.asOf) - dayNumber(CAMPAIGN.start) + 1;
+  const m = { rows, totalDays, elapsedDays, elapsedPct: elapsedDays / totalDays * 100,
+    byBuy: {}, byMonth: {}, budget: 0, used: 0, impr: 0, clicks: 0, eng: 0, clickCampClicks: 0, clickCampImpr: 0 };
+  for (const b of BUYS) m.byBuy[b] = { plan: 0, results: 0, budget: 0, used: 0 };
+  for (const mo of MONTHS) {
+    m.byMonth[mo] = { budget: 0, used: 0, buy: {}, assets: { 'Social post': new Set(), 'HCP': new Set(), 'Cut Video': new Set() } };
+    for (const b of BUYS) m.byMonth[mo].buy[b] = { plan: 0, results: 0 };
+  }
+  const assetsAll = new Set(), assetsLive = new Set();
+  for (const r of rows) {
+    const B = m.byBuy[r.buy], M = m.byMonth[r.month];
+    B.plan += r.plan; B.budget += r.budget; M.budget += r.budget; M.buy[r.buy].plan += r.plan; m.budget += r.budget;
+    M.assets[r.type].add(r.post); assetsAll.add(r.type + '|' + r.post);
+    if (r.actual) {
+      B.results += r.actual.results; B.used += r.actual.used; M.used += r.actual.used; M.buy[r.buy].results += r.actual.results;
+      m.used += r.actual.used; m.impr += r.actual.impr; m.clicks += r.actual.clicks; m.eng += r.actual.eng;
+      if (r.buy === 'Click') { m.clickCampClicks += r.actual.clicks; m.clickCampImpr += r.actual.impr; }
+      if (r.actual.impr > 0) assetsLive.add(r.type + '|' + r.post);
+    }
+  }
+  m.assetsAll = assetsAll.size; m.assetsLive = assetsLive.size;
+  m.rowPlan = {}; m.budget = 0;
+  for (const b of BUYS) { m.rowPlan[b] = { plan: m.byBuy[b].plan, budget: m.byBuy[b].budget }; m.byBuy[b].plan = SOLD[b].kpi; m.byBuy[b].budget = SOLD[b].budget; m.budget += SOLD[b].budget; }
+  // posts delivered
+  const posts = {};
+  for (const r of rows) {
+    if (!r.actual || r.type !== 'Social post') continue;
+    const p = posts[r.post] || (posts[r.post] = { post: r.post, product: r.product, format: r.format, month: r.month, impr: 0, clicks: 0, eng: 0 });
+    p[r.buy] = r; p.impr += r.actual.impr; p.clicks += r.actual.clicks; p.eng += r.actual.eng;
+  }
+  const order = SOCIAL.map(r => String(r[0]));
+  m.posts = Object.values(posts).sort((a, b) => order.indexOf(a.post) - order.indexOf(b.post));
+  // by product, by audience
+  const prod = {}, aud = { User: { impr: 0, clicks: 0, eng: 0 }, Caregiver: { impr: 0, clicks: 0, eng: 0 } };
+  for (const r of rows) {
+    if (!r.actual) continue;
+    const p = prod[r.product] || (prod[r.product] = { product: r.product, posts: new Set(), impr: 0, clicks: 0, eng: 0 });
+    p.posts.add(r.post); p.impr += r.actual.impr; p.clicks += r.actual.clicks; p.eng += r.actual.eng;
+    for (const t of ['User', 'Caregiver']) { const a = r.actual.ta[t]; aud[t].impr += a[1]; aud[t].clicks += a[2]; aud[t].eng += a[4]; }
+  }
+  m.products = Object.values(prod).sort((a, b) => b.impr - a.impr);
+  m.audiences = aud;
+  return m;
+}
+if (typeof module !== 'undefined') module.exports = { buildModel, MONTHS, BUYS, SOLD };
+</script>
+
+<script>
+(function () {
+  const M = buildModel();
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const int = n => Math.round(n).toLocaleString('en-US');
+  const pct = (n, d = 1) => n.toFixed(d) + '%';
+  const ratio = (a, b) => b ? a / b * 100 : 0;
+  const vndM = n => n === 0 ? '0' : (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  const vndCap = n => Math.round(n / 1e6) + 'M';
+  const compact = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M' : int(n);
+  const monthName = (mo, long) => { const [y, m] = mo.split('-').map(Number);
+    const s = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1]; return long ? s + ' ' + y : s + (m === 1 || mo === MONTHS[0] ? " '" + String(y).slice(2) : ''); };
+  const dateShort = iso => { const [y, m, d] = iso.split('-').map(Number); return d + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1]; };
+
+  /* tooltip */
+  const tip = $('tip');
+  function bindTip(node, title, lines) {
+    const show = ev => {
+      tip.textContent = ''; tip.appendChild(el('b', null, title));
+      for (const l of lines) tip.appendChild(el('div', null, l));
+      tip.hidden = false;
+      const r = node.getBoundingClientRect(), t = tip.getBoundingClientRect();
+      let x = r.left + r.width / 2 - t.width / 2; x = Math.max(8, Math.min(x, window.innerWidth - t.width - 8));
+      let y = r.top - t.height - 8; if (y < 8) y = r.bottom + 8;
+      tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    };
+    const hide = () => { tip.hidden = true; };
+    node.addEventListener('pointerenter', show); node.addEventListener('pointerleave', hide);
+    node.addEventListener('focus', show); node.addEventListener('blur', hide);
+  }
+  function meter(p, mark) {
+    const m = el('div', 'meter'); const f = el('div', 'meter-fill'); f.style.width = Math.min(100, p) + '%'; m.appendChild(f);
+    if (mark != null) { const k = el('div', 'meter-mark'); k.style.left = 'calc(' + mark + '% - 1px)'; m.appendChild(k); }
+    return m;
+  }
+  function chip(kind, text) { const c = el('span', 'chip ' + kind); c.appendChild(el('i')); c.appendChild(document.createTextNode(text)); return c; }
+  function achievement(p) { return p >= 100 ? ['good', 'Met'] : p >= 90 ? ['warn', 'Near plan'] : ['crit', 'Below plan']; }
+
+  /* section switch */
+  function wireSwitch(barId, prefix) {
+    const buttons = Array.from($(barId).querySelectorAll('button'));
+    const select = name => {
+      if (!buttons.some(b => b.dataset.panel === name)) return false;
+      buttons.forEach(b => { const on = b.dataset.panel === name; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; $(prefix + b.dataset.panel).hidden = !on; });
+      tip.hidden = true; return true;
+    };
+    buttons.forEach((b, i) => {
+      b.addEventListener('click', () => select(b.dataset.panel));
+      b.addEventListener('keydown', ev => {
+        if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+        const n = buttons[(i + (ev.key === 'ArrowRight' ? 1 : buttons.length - 1)) % buttons.length];
+        select(n.dataset.panel); n.focus(); ev.preventDefault();
+      });
+    });
+    return select;
+  }
+  const selectTab = wireSwitch('tabs', 'panel-');
+  wireSwitch('subtabs', 'sub-');
+  selectTab((location.hash || '').slice(1) || 'overall') || selectTab('overall');
+
+  /* header */
+  const asOfLong = (() => { const [y, m, d] = CAMPAIGN.asOf.split('-').map(Number); return d + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1] + ' ' + y; })();
+  $('asof').textContent = asOfLong;
+  $('tlFill').style.width = M.elapsedPct + '%';
+  $('tlNow').style.left = 'calc(' + M.elapsedPct + '% - 1px)';
+  const daysIn = MONTHS.map(mo => { const [y, m] = mo.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); });
+  $('tlMonths').style.gridTemplateColumns = daysIn.map(d => d + 'fr').join(' ');
+  MONTHS.forEach(mo => $('tlMonths').appendChild(el('span', null, monthName(mo))));
+  $('overallNote').textContent = 'Day ' + M.elapsedDays + ' of ' + M.totalDays + ' (' + pct(M.elapsedPct, 0) + ' of the campaign period)';
+
+  /* overall tiles */
+  const tiles = [
+    { label: 'Budget used', value: vndM(M.used) + ' ₫', of: 'of ' + vndM(M.budget) + ' ₫ total, ' + vndM(M.budget - M.used) + ' ₫ remaining', p: ratio(M.used, M.budget) },
+    { label: 'Impressions delivered', value: compact(M.byBuy['Impression'].results), of: 'of ' + compact(M.byBuy['Impression'].plan) + ' KPI', p: ratio(M.byBuy['Impression'].results, M.byBuy['Impression'].plan) },
+    { label: 'Clicks delivered', value: int(M.byBuy['Click'].results), of: 'of ' + int(M.byBuy['Click'].plan) + ' KPI', p: ratio(M.byBuy['Click'].results, M.byBuy['Click'].plan) },
+    { label: 'Content published', value: M.assetsLive + ' of ' + M.assetsAll, of: 'posts and videos planned for the campaign', p: ratio(M.assetsLive, M.assetsAll) }
+  ];
+  for (const t of tiles) {
+    const a = el('article', 'card tile');
+    a.appendChild(el('div', 'tile-label', t.label));
+    a.appendChild(el('div', 'tile-value', t.value));
+    a.appendChild(el('div', 'tile-of', t.of));
+    a.appendChild(meter(t.p, M.elapsedPct));
+    const f = el('div', 'tile-foot'); f.appendChild(el('strong', null, pct(t.p))); a.appendChild(f);
+    $('tiles').appendChild(a);
+  }
+  const strip = [
+    ['Impressions, all campaigns', int(M.impr)], ['Clicks, all campaigns', int(M.clicks)], ['Engagements', int(M.eng)],
+    ['CTR on click campaigns', pct(ratio(M.clickCampClicks, M.clickCampImpr), 2)], ['Engagement rate', pct(ratio(M.eng, M.impr), 2)]
+  ];
+  for (const [k, v] of strip) { const d = el('div'); d.appendChild(el('span', 'k', k)); d.appendChild(el('span', 'v', v)); $('strip').appendChild(d); }
+
+  /* KPI progress */
+  const curMonth = CAMPAIGN.asOf.slice(0, 7);
+  for (const b of BUYS) {
+    const B = M.byBuy[b], p = ratio(B.results, B.plan);
+    const row = el('div', 'kpi');
+    const top = el('div', 'kpi-top');
+    const name = el('span', 'kpi-name', BUY_LABEL[b][0]); name.appendChild(el('small', null, BUY_LABEL[b][1])); top.appendChild(name);
+    const val = el('span', 'kpi-val'); val.appendChild(el('strong', null, pct(p))); val.appendChild(document.createTextNode('  ' + int(B.results) + ' of ' + int(B.plan) + ', ' + int(Math.max(0, B.plan - B.results)) + ' remaining')); top.appendChild(val);
+    row.appendChild(top); row.appendChild(meter(p, M.elapsedPct));
+    const note = el('div', 'kpi-note');
+    if (B.results > 0) {
+      note.appendChild(chip(p >= M.elapsedPct ? 'good' : 'warn', p >= M.elapsedPct ? 'Ahead of pace' : 'Behind pace'));
+    } else {
+      note.appendChild(chip('idle', 'Not started'));
+    }
+    row.appendChild(note); $('kpis').appendChild(row);
+  }
+
+  /* budget chart */
+  const AX_MAX = 340e6, TICKS = [0, 100e6, 200e6, 300e6];
+  for (const t of TICKS) {
+    const s = el('span', null, t / 1e6 + 'M'); s.style.bottom = (t / AX_MAX * 100) + '%'; $('yaxis').appendChild(s);
+    if (t > 0) { const g = el('div', 'gridline'); g.style.bottom = (t / AX_MAX * 100) + '%'; $('plot').insertBefore(g, $('cols')); }
+  }
+  for (const mo of MONTHS) {
+    const d = M.byMonth[mo];
+    const col = el('div', 'col'); col.tabIndex = 0; col.setAttribute('role', 'img');
+    col.setAttribute('aria-label', monthName(mo, true) + ': planned ' + int(d.budget) + ' VND, used ' + int(d.used) + ' VND');
+    col.appendChild(el('span', 'cap', vndCap(d.budget)));
+    const bar = el('div', 'bar'); bar.style.height = (d.budget / AX_MAX * 100) + '%';
+    if (d.used > 0) { const u = el('div', 'usedbar'); u.style.height = Math.min(100, ratio(d.used, d.budget)) + '%'; bar.appendChild(u); }
+    col.appendChild(bar);
+    bindTip(col, monthName(mo, true), ['Planned ' + int(d.budget) + ' ₫', 'Used ' + int(d.used) + ' ₫ (' + pct(ratio(d.used, d.budget)) + ')']);
+    $('cols').appendChild(col);
+    $('xaxis').appendChild(el('span', null, monthName(mo)));
+  }
+  /* budget by channel and by buying type */
+  const CHANNEL_OF = { 'Impression': 'Facebook', 'Thruplay': 'Facebook', 'Click': 'Facebook', 'View 2s': 'TikTok' };
+  for (const ch of ['Facebook', 'TikTok']) {
+    const buys = BUYS.filter(b => CHANNEL_OF[b] === ch);
+    const budget = buys.reduce((a, b) => a + M.byBuy[b].budget, 0), used = buys.reduce((a, b) => a + M.byBuy[b].used, 0), p = ratio(used, budget);
+    const a = el('article', 'card tile');
+    a.appendChild(el('div', 'tile-label', ch + ' budget used'));
+    a.appendChild(el('div', 'tile-value', vndM(used) + ' ₫'));
+    a.appendChild(el('div', 'tile-of', 'of ' + vndM(budget) + ' ₫, ' + vndM(budget - used) + ' ₫ remaining'));
+    a.appendChild(meter(p, M.elapsedPct));
+    const f = el('div', 'tile-foot'); f.appendChild(el('strong', null, pct(p)));
+    if (used === 0) f.appendChild(chip('idle', 'Not started'));
+    a.appendChild(f); $('channels').appendChild(a);
+  }
+  (function () {
+    const t = $('buyTable');
+    const hr = t.createTHead().insertRow();
+    [['Channel and KPI', ''], ['Planned budget', 'r'], ['Used', 'r'], ['Remaining', 'r'], ['% used', 'r']].forEach(([h, c]) => hr.appendChild(el('th', c, h)));
+    const tb = t.createTBody();
+    for (const b of BUYS) {
+      const B = M.byBuy[b], r = tb.insertRow();
+      const c0 = r.insertCell(); c0.textContent = CHANNEL_OF[b] + ' · ' + BUY_LABEL[b][0];
+      [int(B.budget), int(B.used), int(B.budget - B.used), pct(ratio(B.used, B.budget))].forEach(v => { const c = r.insertCell(); c.className = 'r'; c.textContent = v; });
+    }
+    const f = t.createTFoot().insertRow();
+    ['Total, VND', int(M.budget), int(M.used), int(M.budget - M.used), pct(ratio(M.used, M.budget))].forEach((v, i) => { const c = f.insertCell(); if (i > 0) c.className = 'r'; c.textContent = v; });
+  })();
+
+  /* posts delivered */
+  (function () {
+    const t = $('postTable');
+    const hr = t.createTHead().insertRow();
+    [['Post', ''], ['Month', ''], ['Impression KPI', ''], ['Click KPI', ''], ['CTR, click campaign', 'r'], ['Engagement rate', 'r'], ['', '']]
+      .forEach(([h, c]) => hr.appendChild(el('th', c, h)));
+    const tb = t.createTBody();
+    const kpiCell = (cell, row) => {
+      if (!row) { cell.appendChild(el('span', 'sub', 'Not planned')); return; }
+      const p = ratio(row.actual.results, row.plan), [kind, label] = achievement(p);
+      const box = el('div', 'kpicell'), line = el('div', 'line');
+      line.appendChild(el('span', 'num', int(row.actual.results) + ' / ' + int(row.plan)));
+      line.appendChild(chip(kind, pct(p) + ' ' + label));
+      box.appendChild(line);
+      const cb = el('div', 'cellbar'), f = el('b'); f.style.width = Math.min(100, p) + '%'; cb.appendChild(f); box.appendChild(cb);
+      cell.appendChild(box);
+    };
+    for (const p of M.posts) {
+      const link = POST_LINK[p.post], r = tb.insertRow();
+      const c0 = r.insertCell(); c0.textContent = 'Post ' + p.post + ' · ' + p.product; c0.appendChild(el('span', 'l2', p.format + ' image post'));
+      const cm = r.insertCell(); cm.textContent = monthName(p.month, true); cm.style.whiteSpace = 'nowrap';
+      kpiCell(r.insertCell(), p['Impression']); kpiCell(r.insertCell(), p['Click']);
+      const cc = r.insertCell(); cc.className = 'r'; cc.textContent = p['Click'] && p['Click'].actual.impr ? pct(ratio(p['Click'].actual.clicks, p['Click'].actual.impr), 2) : 'n/a';
+      const ce = r.insertCell(); ce.className = 'r'; ce.textContent = pct(ratio(p.eng, p.impr), 2);
+      const cl = r.insertCell(); cl.style.whiteSpace = 'nowrap';
+      if (link) { const a = el('a', null, 'View post'); a.href = link; a.target = '_blank'; a.rel = 'noopener'; cl.appendChild(a); }
+    }
+  })();
+
+  /* month by month */
+  (function () {
+    const t = $('monthTable');
+    const hr = t.createTHead().insertRow();
+    [['Month', ''], ['Content planned', ''], ['Budget planned', 'r'], ['Budget used', 'r'], ['Impressions KPI', 'r'], ['Delivered', 'r'], ['Clicks KPI', 'r'], ['Delivered', 'r'], ['ThruPlays KPI', 'r'], ['TikTok views KPI', 'r']]
+      .forEach(([h, c]) => hr.appendChild(el('th', c, h)));
+    const tb = t.createTBody();
+    const dash = '–';
+    for (const mo of MONTHS) {
+      const d = M.byMonth[mo], r = tb.insertRow();
+      r.insertCell().textContent = monthName(mo, true);
+      const parts = [];
+      const n = k => d.assets[k].size;
+      if (n('Social post')) parts.push(n('Social post') + ' posts');
+      if (n('HCP')) parts.push(n('HCP') + ' HCP videos');
+      if (n('Cut Video')) parts.push(n('Cut Video') + ' livestream cuts');
+      r.insertCell().textContent = parts.join(', ');
+      const started = mo <= curMonth;
+      const cells = [int(d.budget), started ? int(d.used) : dash,
+        int(d.buy['Impression'].plan), started ? int(d.buy['Impression'].results) : dash,
+        int(d.buy['Click'].plan), started ? int(d.buy['Click'].results) : dash,
+        d.buy['Thruplay'].plan ? int(d.buy['Thruplay'].plan) : dash, d.buy['View 2s'].plan ? int(d.buy['View 2s'].plan) : dash];
+      cells.forEach(v => { const c = r.insertCell(); c.className = 'r'; c.textContent = v; });
+    }
+    const f = t.createTFoot().insertRow();
+    ['Total', M.assetsAll + ' posts and videos', int(M.budget), int(M.used), int(M.byBuy['Impression'].plan), int(M.byBuy['Impression'].results),
+      int(M.byBuy['Click'].plan), int(M.byBuy['Click'].results), int(M.byBuy['Thruplay'].plan), int(M.byBuy['View 2s'].plan)]
+      .forEach((v, i) => { const c = f.insertCell(); if (i > 1) c.className = 'r'; c.textContent = v; });
+  })();
+
+  /* by product, by audience */
+  function simpleTable(t, firstHead, items) {
+    const hr = t.createTHead().insertRow();
+    [[firstHead, ''], ['Impressions', 'r'], ['Clicks', 'r'], ['CTR', 'r'], ['Engagements', 'r'], ['Eng. rate', 'r']].forEach(([h, c]) => hr.appendChild(el('th', c, h)));
+    const tb = t.createTBody();
+    for (const it of items) {
+      const r = tb.insertRow(); const c0 = r.insertCell(); c0.textContent = it.name; if (it.sub) c0.appendChild(el('span', 'l2', it.sub));
+      [int(it.impr), int(it.clicks), pct(ratio(it.clicks, it.impr), 2), int(it.eng), pct(ratio(it.eng, it.impr), 2)].forEach(v => { const c = r.insertCell(); c.className = 'r'; c.textContent = v; });
+    }
+  }
+  simpleTable($('prodTable'), 'Product', M.products.map(p => ({ name: p.product, sub: p.posts.size + (p.posts.size === 1 ? ' post' : ' posts'), impr: p.impr, clicks: p.clicks, eng: p.eng })));
+  simpleTable($('audTable'), 'Audience', ['User', 'Caregiver'].map(k => ({ name: k, sub: 'All genders, 45 to 65, Ho Chi Minh City and Hanoi', impr: M.audiences[k].impr, clicks: M.audiences[k].clicks, eng: M.audiences[k].eng })));
+})();
+</script>
+
+</body></html>
