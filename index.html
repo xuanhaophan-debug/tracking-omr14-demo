@@ -1,164 +1,167 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
 <title>OMRON IQ & ECG Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
-/* Layout: logo header with a campaign timeline, then one section at a time behind a
-   three-way switch: Overall, KPI & Budget, Detail. Plain white ground, one deep blue
-   for every data mark. Single light theme by choice. */
+/* Layout: a 3:4 portrait frame (about 900 x 1200) so the page can sit inside another page.
+   Logo and title, the campaign timeline with its runrate marker, then one section at a time:
+   Overall, KPI & Budget, Detail. Plain white ground, one deep blue for data; channel names
+   wear their platform colour; status colours only on status marks. */
 :root{
   color-scheme:light;
   --page:#ffffff; --ink:#0b1a2b; --ink-2:#4a5a6a; --muted:#8a96a3;
   --grid:#e6ebf0; --axis:#c5ced8; --border:#dfe5ec; --wash:#f3f6f9;
-  --fill:#005eb8; --track:#d6e6f6; --on-fill:#ffffff; --on-fill-2:#cfe2f5;
+  --fill:#005eb8; --track:#d6e6f6; --on-fill:#ffffff;
+  --good:#188a41; --warn:#d98200; --crit:#c8372d; --idle:#8a96a3;
   --font:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
-body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px;display:flex;flex-direction:column;gap:20px}
+body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.4}
+.wrap{max-width:900px;aspect-ratio:3/4;margin:0 auto;padding-inline:20px;padding-block:20px 28px;display:flex;flex-direction:column;gap:18px}
 h1,h2,h3,p{margin:0}
-h1{font-size:26px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
-h2{font-size:17px;font-weight:700}
+h1{font-size:34px;font-weight:700;letter-spacing:-.015em;line-height:1.1;text-wrap:balance}
+h2{font-size:18px;font-weight:700}
 h3{font-size:14px;font-weight:700}
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
-.sub{color:var(--ink-2)}
+.ch{font-weight:700}
 
 /* header */
-.head{display:flex;flex-direction:column;gap:14px}
-.head-top{display:flex;flex-wrap:wrap;gap:14px 24px;justify-content:space-between;align-items:center}
-.brand{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;min-width:0}
-.head-title{display:flex;flex-direction:column;gap:2px;min-width:0}
-.logo{width:132px;height:48px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--axis);border-radius:6px;color:var(--muted);font-size:12px;flex:none}
+.head{display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;min-width:0}
+.head-title{display:flex;flex-direction:column;gap:3px;min-width:0}
+.logo{width:120px;height:48px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--axis);border-radius:6px;color:var(--muted);font-size:12px;flex:none}
 .logo.has{border:0}
 .logo img{max-width:100%;max-height:100%;object-fit:contain}
-.meta{display:flex;flex-wrap:wrap;gap:6px 20px;color:var(--ink-2);font-size:13px}
-.meta b{color:var(--ink);font-weight:500}
 .timeline{display:flex;flex-direction:column;gap:6px}
-.tl-label{position:relative;height:40px}
+.tl-label{position:relative;height:38px}
 .tl-label div{position:absolute;bottom:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;line-height:1.15;white-space:nowrap}
-.tl-label span{font-size:12px;color:var(--ink-2);font-weight:500}
-.tl-label strong{font-size:22px;font-weight:700;color:var(--fill)}
+.tl-label span{font-size:11.5px;color:var(--ink-2);font-weight:500}
+.tl-label strong{font-size:20px;font-weight:700;color:var(--fill)}
 .tl-bar{position:relative;height:10px;border-radius:5px;background:var(--track)}
 .tl-fill{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:5px 0 0 5px}
 .tl-now{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
-.tl-months{display:grid;font-size:12px;color:var(--ink-2)}
+.tl-months{display:grid;font-size:11.5px;color:var(--ink-2)}
 .tl-months span{border-left:1px solid var(--axis);padding-left:5px;white-space:nowrap;overflow:hidden}
 
 /* section switch */
-.tabs,.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--wash);border-radius:10px;padding:4px;align-self:flex-start;max-width:100%}
-.tabs button,.seg button{font:inherit;font-weight:500;color:var(--ink-2);background:transparent;border:1px solid transparent;border-radius:7px;padding:8px 16px;cursor:pointer;white-space:nowrap}
-.seg button{padding:5px 12px;font-size:13px}
-.tabs button:hover,.seg button:hover{color:var(--ink)}
-.tabs button[aria-selected="true"],.seg button[aria-selected="true"]{background:var(--fill);color:var(--on-fill);border-color:var(--fill)}
-.tabs button:focus-visible,.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.tabrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.stamp{font-size:12px;color:var(--ink-2)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--wash);border-radius:10px;padding:4px;max-width:100%}
+.tabs button{font:inherit;font-weight:500;color:var(--ink-2);background:transparent;border:1px solid transparent;border-radius:7px;padding:7px 16px;cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--fill);color:var(--on-fill);border-color:var(--fill)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 
-/* sections */
-.section{display:flex;flex-direction:column;gap:12px}
-.section-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between}
+/* shared */
+.section{display:flex;flex-direction:column;gap:24px;min-width:0}
+.block{display:flex;flex-direction:column;gap:10px;min-width:0}
+.block-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between}
 .card{background:var(--page);border:1px solid var(--border);border-radius:10px;padding:18px;min-width:0}
-.stack{display:flex;flex-direction:column;gap:14px}
-.fine{font-size:12.5px;color:var(--ink-2);max-width:78ch}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2);align-items:center}
 .sw{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 .sw.plan{background:var(--track)} .sw.used{background:var(--fill)}
 .sw.now{width:2px;height:12px;background:var(--ink);border-radius:0}
-
-/* overall tiles: the percentage leads, the amount follows */
-.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-@media (max-width:1040px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:520px){.tiles{grid-template-columns:minmax(0,1fr)}}
-.tile{display:flex;flex-direction:column;gap:4px}
-.tile-label{font-size:13px;color:var(--ink-2);font-weight:500}
-.tile-label small{font-weight:400;margin-left:6px}
-.tile-value{font-size:40px;font-weight:700;line-height:1.05;letter-spacing:-.02em}
-.tile-of{color:var(--ink-2);font-size:13px}
-.meter{position:relative;height:10px;border-radius:5px;background:var(--track);margin-block:8px 2px}
+.meter{position:relative;height:10px;border-radius:5px;background:var(--track)}
 .meter-fill{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:5px}
 .meter-mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
-.tile.lead{background:var(--fill);border-color:var(--fill);color:var(--on-fill)}
-.tile.lead .tile-label,.tile.lead .tile-of{color:var(--on-fill-2)}
-.tile.lead .tile-of b{color:var(--on-fill);font-weight:700}
-.tile.lead .meter{background:rgba(255,255,255,.28)}
-.tile.lead .meter-fill{background:var(--on-fill)}
-.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;padding:0;background:var(--grid);overflow:hidden}
-@media (max-width:760px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.strip div{padding:12px 18px;display:flex;flex-direction:column;gap:2px;background:var(--page)}
-.strip .k{font-size:12px;color:var(--ink-2)}
-.strip .v{font-size:18px;font-weight:700}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.status i{width:9px;height:9px;border-radius:50%;flex:none}
+.status.on i{background:var(--good)} .status.risk i{background:var(--warn)} .status.behind i{background:var(--crit)} .status.none i{background:var(--idle)}
+
+/* overall */
+.spend{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px 28px;align-items:center;padding:22px}
+@media (max-width:640px){.spend{grid-template-columns:minmax(0,1fr)}}
+.spend-main{display:flex;flex-direction:column;gap:10px}
+.spend-pct{font-size:64px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.pair{display:flex;flex-direction:column;gap:12px}
+.pair div{display:flex;flex-direction:column}
+.pair .k{font-size:13px;color:var(--ink-2)}
+.pair .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{display:flex;flex-direction:column;gap:8px;padding:18px 16px}
+.kpi-name{font-size:14px;font-weight:500;color:var(--ink)}
+.kpi-name .ch{display:block;font-size:12.5px}
+.kpi-pct{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.kpi-of{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.impact{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.impact{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.impact .card{display:flex;flex-direction:column;gap:8px;padding:26px 14px}
+.impact .k{font-size:14px;color:var(--ink-2);font-weight:500}
+.impact .v{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em}
 
 /* tables */
 .tablebox{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--page)}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--grid);vertical-align:middle}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--grid);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 th{font-size:12px;font-weight:500;color:var(--ink-2);white-space:nowrap}
-tr.group th{font-size:12px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.06em;border-bottom:0;padding-bottom:2px}
 td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-th.edge,td.edge{border-left:1px solid var(--grid)}
 tbody td:first-child{white-space:nowrap}
-td .l2{display:block;color:var(--ink-2);font-size:12px}
+td .l2{display:block;font-size:12.5px}
+td .l3{display:block;color:var(--ink-2);font-size:12px}
 tfoot td{font-weight:700;border-top:1px solid var(--axis);border-bottom:0}
-.pc{display:flex;flex-direction:column;gap:5px;align-items:flex-end;min-width:96px}
+.pc{display:flex;flex-direction:column;gap:4px;align-items:flex-end;min-width:86px}
 .pc strong{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
 .cellbar{height:6px;border-radius:3px;background:var(--track);position:relative;width:100%}
 .cellbar b{position:absolute;inset:0 auto 0 0;background:var(--fill);border-radius:3px}
 .cellbar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
-.kpicell{display:flex;gap:8px;align-items:center;justify-content:space-between;min-width:190px}
-.kpicell .num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
-.kpicell .pc{min-width:62px}
-a{color:var(--fill);text-underline-offset:2px}
-a:focus-visible,.col:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
 
-/* roadmap */
-.rm th{min-width:118px}
-.rm th:first-child{min-width:150px}
-.rm td{vertical-align:top}
-.rm th.now{color:var(--fill);font-weight:700}
-.rm th.now,.rm td.now{background:var(--wash)}
-.rm-chips{display:flex;flex-wrap:wrap;gap:4px}
-.rm-chip{font-size:12px;border-radius:5px;padding:2px 7px;white-space:nowrap;border:1px solid var(--axis);color:var(--ink-2);background:var(--page)}
-.rm-chip.done{background:var(--fill);border-color:var(--fill);color:var(--on-fill)}
-.sw.out{background:var(--page);border:1px solid var(--axis)}
-
-/* monthly column chart */
+/* budget by month */
 .chart{display:grid;grid-template-columns:44px minmax(0,1fr);gap:0 6px}
-.yaxis{position:relative;height:200px;font-size:11px;color:var(--ink-2)}
+.yaxis{position:relative;height:162px;font-size:11px;color:var(--ink-2)}
 .yaxis span{position:absolute;right:0;transform:translateY(50%);white-space:nowrap}
-.plot{position:relative;height:200px;border-bottom:1px solid var(--axis)}
+.plot{position:relative;height:162px;border-bottom:1px solid var(--axis)}
 .gridline{position:absolute;left:0;right:0;height:1px;background:var(--grid)}
-.cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.cols{position:absolute;inset:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 .col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;cursor:default;outline:0}
 .col .cap{font-size:11.5px;color:var(--ink-2);white-space:nowrap}
 .col .bar{position:relative;width:24px;max-width:70%;background:var(--track);border-radius:4px 4px 0 0}
 .col .usedbar{position:absolute;left:0;right:0;bottom:0;background:var(--fill);border-radius:4px 4px 0 0}
 .col:hover .bar,.col:focus-visible .bar{filter:brightness(.94)}
-.xaxis{grid-column:2;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));font-size:11.5px;color:var(--ink-2);text-align:center;padding-top:6px}
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
-@media (max-width:860px){.split{grid-template-columns:minmax(0,1fr)}}
-#tip{position:fixed;z-index:10;pointer-events:none;background:var(--ink);color:var(--on-fill);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:240px;box-shadow:0 4px 14px rgba(11,26,43,.2)}
+.col:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.xaxis{grid-column:2;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);font-size:11.5px;color:var(--ink-2);text-align:center;padding-top:6px}
+
+/* detail sheet */
+.filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end}
+.filters label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-2);font-weight:500}
+.filters select{font:inherit;font-size:13px;color:var(--ink);background:var(--page);border:1px solid var(--axis);border-radius:7px;padding:6px 9px;min-width:118px}
+.filters select:focus-visible,.btn:focus-visible{outline:2px solid var(--fill);outline-offset:1px}
+.btn{font:inherit;font-size:13px;font-weight:500;color:var(--on-fill);background:var(--fill);border:1px solid var(--fill);border-radius:7px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.filters .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.filters .note{font-size:12px;color:var(--ink-2)}
+.sheetbox{max-height:760px;overflow:auto}
+.sheet{font-size:12.5px;border-collapse:separate;border-spacing:0}
+.sheet th,.sheet td{padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--grid);border-right:1px solid var(--grid);background:var(--page)}
+.sheet th:last-child,.sheet td:last-child{border-right:0}
+.sheet thead th{position:sticky;top:0;z-index:2;background:var(--wash);color:var(--ink);font-weight:700;font-size:12px;border-bottom:1px solid var(--axis)}
+.sheet .fz{position:sticky;left:0;z-index:1}
+.sheet .fz2{left:var(--fz1,0px);border-right:2px solid var(--axis)}
+.sheet thead th.fz{z-index:3}
+.sheet td.strong{font-weight:700}
+.sheet a{color:var(--fill);text-underline-offset:2px}
+.sheet .empty td{text-align:center;color:var(--ink-2);padding:24px}
+#tip{position:fixed;z-index:10;pointer-events:none;background:var(--ink);color:var(--on-fill);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:260px;box-shadow:0 4px 14px rgba(11,26,43,.2)}
 #tip b{display:block;font-size:13px}
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header class="head">
-    <div class="head-top">
-      <div class="brand">
-        <div class="logo" id="logoClient"></div>
-        <div class="head-title">
-          <span class="eyebrow">Digital campaign report</span>
-          <h1>IQ &amp; ECG Campaign 2026</h1>
-        </div>
+    <div class="brand">
+      <div class="logo" id="logoClient"></div>
+      <div class="head-title">
+        <span class="eyebrow">Digital campaign report</span>
+        <h1 id="campaignName"></h1>
       </div>
-      <div class="logo" id="logoAgency"></div>
-    </div>
-    <div class="meta">
-      <span><b>Client</b> OMRON</span>
-      <span><b>Agency</b> Hedima</span>
-      <span><b>Channels</b> Facebook, TikTok</span>
-      <span><b>Period</b> 1 Sep 2026 to 31 Mar 2027</span>
-      <span><b>Data as of</b> <span id="asof"></span></span>
-      <span><b>Day</b> <span id="dayOf"></span></span>
-      <span><b>Monthly runrate</b> <span id="monthRun"></span></span>
     </div>
     <div class="timeline" aria-label="Campaign timeline">
       <div class="tl-label"><div id="tlLabel"><span>Project runrate</span><strong id="tlPct"></strong></div></div>
@@ -167,224 +170,421 @@ a:focus-visible,.col:focus-visible{outline:2px solid var(--ink);outline-offset:2
     </div>
   </header>
 
+  <div class="tabrow">
   <nav class="tabs" role="tablist" aria-label="Dashboard sections" id="tabs">
     <button type="button" role="tab" id="tab-overall" data-panel="overall" aria-selected="true">Overall</button>
     <button type="button" role="tab" id="tab-kpi" data-panel="kpi" aria-selected="false">KPI &amp; Budget</button>
-    <button type="button" role="tab" id="tab-roadmap" data-panel="roadmap" aria-selected="false">Roadmap</button>
     <button type="button" role="tab" id="tab-detail" data-panel="detail" aria-selected="false">Detail</button>
   </nav>
+  <span class="stamp" id="stamp" aria-live="polite"></span>
+  </div>
 
   <section class="section" id="panel-overall" role="tabpanel" aria-labelledby="tab-overall">
-    <div class="section-head">
-      <h2>Overall</h2>
-      <div class="legend"><span><span class="sw used"></span>Achieved</span><span><span class="sw plan"></span>Total</span><span><span class="sw now"></span>Project runrate</span></div>
+    <div class="block">
+      <div class="block-head"><h2>Spending progress</h2><span class="legend"><span><span class="sw used"></span>Used</span><span><span class="sw plan"></span>Budget</span><span><span class="sw now"></span>Project runrate</span></span></div>
+      <div class="card spend">
+        <div class="spend-main"><div class="spend-pct" id="spendPct"></div><div class="meter" id="spendMeter"></div></div>
+        <div class="pair">
+          <div><span class="k">Used</span><span class="v" id="spendUsed"></span></div>
+          <div><span class="k">Remaining budget</span><span class="v" id="spendLeft"></span></div>
+        </div>
+      </div>
     </div>
-    <div class="tiles" id="tiles"></div>
-    <div class="card strip" id="strip"></div>
+    <div class="block">
+      <div class="block-head"><h2>KPI achieved</h2><span class="legend"><span><span class="sw used"></span>Achieved</span><span><span class="sw plan"></span>Committed</span><span><span class="sw now"></span>Project runrate</span></span></div>
+      <div class="kpis" id="kpis"></div>
+    </div>
+    <div class="block">
+      <div class="block-head"><h2>Total Impact on Brand</h2></div>
+      <div class="impact" id="impact"></div>
+    </div>
   </section>
 
   <section class="section" id="panel-kpi" role="tabpanel" aria-labelledby="tab-kpi" hidden>
-    <div class="section-head">
-      <h2>KPI &amp; Budget</h2>
-      <div class="legend"><span><span class="sw used"></span>Achieved</span><span><span class="sw plan"></span>Total</span><span><span class="sw now"></span>Project runrate</span></div>
+    <div class="block">
+      <div class="block-head"><h2>KPI</h2><span class="legend"><span><span class="sw used"></span>Achieved</span><span><span class="sw plan"></span>Committed</span><span><span class="sw now"></span>Project runrate</span></span></div>
+      <div class="tablebox"><table id="kpiTable"></table></div>
     </div>
-    <div class="tablebox"><table id="kbTable"></table></div>
-    <div class="card stack">
-      <div class="section-head">
-        <h3>Budget by month, million VND</h3>
-        <div class="legend"><span><span class="sw used"></span>Used</span><span><span class="sw plan"></span>Planned</span></div>
+    <div class="block">
+      <div class="block-head"><h2>Budget</h2></div>
+      <div class="tablebox"><table id="budTable"></table></div>
+    </div>
+    <div class="block">
+      <div class="block-head"><h2>Budget by month</h2><span class="legend"><span><span class="sw used"></span>Used</span><span><span class="sw plan"></span>Planned</span></span></div>
+      <div class="card">
+        <div class="chart">
+          <div class="yaxis" id="yaxis"></div>
+          <div class="plot" id="plot"><div class="cols" id="cols"></div></div>
+          <div class="xaxis" id="xaxis"></div>
+        </div>
       </div>
-      <div class="chart">
-        <div class="yaxis" id="yaxis"></div>
-        <div class="plot" id="plot"><div class="cols" id="cols"></div></div>
-        <div class="xaxis" id="xaxis"></div>
-      </div>
     </div>
-    <p class="fine">Budget used follows the KPI delivered, capped at the planned KPI.</p>
-  </section>
-
-  <section class="section" id="panel-roadmap" role="tabpanel" aria-labelledby="tab-roadmap" hidden>
-    <div class="section-head">
-      <h2>Roadmap</h2>
-      <div class="legend"><span><span class="sw used"></span>Delivered</span><span><span class="sw out"></span>Planned</span></div>
-    </div>
-    <div class="tablebox"><table id="roadTable" class="rm"></table></div>
   </section>
 
   <section class="section" id="panel-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
-    <div class="section-head">
-      <h2>Detail</h2>
-      <div class="seg" role="tablist" aria-label="Detail views" id="subtabs">
-        <button type="button" role="tab" id="sub-tab-posts" data-panel="posts" aria-selected="true">Posts delivered</button>
-        <button type="button" role="tab" id="sub-tab-months" data-panel="months" aria-selected="false">Month by month</button>
-        <button type="button" role="tab" id="sub-tab-breakdown" data-panel="breakdown" aria-selected="false">Product and audience</button>
-      </div>
+    <div class="filters">
+      <label for="fMonth">Month<select id="fMonth"></select></label>
+      <label for="fProduct">Product<select id="fProduct"></select></label>
+      <label for="fChannel">Channel<select id="fChannel"></select></label>
+      <label for="fBuy">Buying Type<select id="fBuy"></select></label>
+      <label for="fStatus">Status<select id="fStatus"></select></label>
+      <span class="right"><span class="note" id="xNote" aria-live="polite"></span><button type="button" class="btn" id="xBtn">Export Excel</button></span>
     </div>
-    <div class="section" id="sub-posts" role="tabpanel" aria-labelledby="sub-tab-posts">
-      <div class="tablebox"><table id="postTable"></table></div>
-      <p class="fine">Reach is the sum of each ad set's reach. CTR is all clicks divided by impressions. Engagement rate is engagements divided by impressions.</p>
-    </div>
-    <div class="section" id="sub-months" role="tabpanel" aria-labelledby="sub-tab-months" hidden>
-      <div class="tablebox"><table id="monthTable"></table></div>
-    </div>
-    <div class="section" id="sub-breakdown" role="tabpanel" aria-labelledby="sub-tab-breakdown" hidden>
-      <div class="tablebox"><table id="prodTable"></table></div>
-      <div class="tablebox"><table id="audTable"></table></div>
-    </div>
+    <div class="tablebox sheetbox"><table id="sheet" class="sheet"></table></div>
   </section>
 </div>
 <div id="tip" hidden></div>
 
-<script id="model">
-/* ---------- data: snapshot of the campaign report sheet ---------- */
-const CAMPAIGN = { start: '2026-09-01', end: '2027-03-31', asOf: '2026-10-06' };
-const RATE = { 'Impression': 28, 'Click': 4500, 'Thruplay': 220, 'View 2s': 60 };
-const MONTHS = ['2026-09','2026-10','2026-11','2026-12','2027-01','2027-02','2027-03'];
-const BUYS = ['Impression','Thruplay','Click','View 2s'];
-// KPI and budget committed to the client, per channel and buying type
-const SOLD = {
-  'Impression': { kpi: 12500000, budget: 350000000 },
-  'Thruplay':   { kpi: 500000,   budget: 110000000 },
-  'Click':      { kpi: 80000,    budget: 360000000 },
-  'View 2s':    { kpi: 1500000,  budget: 90000000 }
-};
-const BUY_LABEL = {
-  'Impression': ['Impressions','Facebook'],
-  'Click': ['Clicks','Facebook'],
-  'Thruplay': ['ThruPlays','Facebook HCP videos'],
-  'View 2s': ['2-second views','TikTok']
-};
-// [post, month, product, format]
-const SOCIAL = [
-  [1,'2026-09','IQBT','Single'],[2,'2026-09','Complete','Single'],[3,'2026-09','7383T1','Single'],
-  [29,'2026-09','Promotion','Single'],[4,'2026-09','Complete, 1L, 6L','Album'],
-  [5,'2026-10','IQBT','Single'],[6,'2026-10','ECG 1L','Single'],[7,'2026-10','Complete','Album'],
-  [8,'2026-10','IQBT + 7383T1','Album'],[9,'2026-10','ECG 6L','Album'],[10,'2026-10','ECG 1L','Album'],
-  [11,'2026-11','Complete, 1L, 6L','Album'],[12,'2026-11','7383T1','GIF'],[13,'2026-11','IQBT','GIF'],[14,'2026-11','IQBT','Album'],
-  [15,'2026-12','7383T1','Single'],[16,'2026-12','IQBT','Album'],[17,'2026-12','IQBT','GIF'],[18,'2026-12','IQBT','Album'],
-  [19,'2027-01','7383T1','Single'],[20,'2027-01','IQBT','Single'],[21,'2027-01','IQBT','Album'],[22,'2027-01','Complete','Album'],
-  [23,'2027-02','IQBT','Single'],[24,'2027-02','ECG 6L','Album'],[25,'2027-02','7383T1','GIF'],[26,'2027-02','IQBT','Single'],
-  [27,'2027-03','ECG 6L','GIF'],[28,'2027-03','ECG 1L','Album']
-];
-const NO_CLICK = [4];
-const TIKTOK_POSTS = [12,13,17,25,27];
-// delivered ad sets: key = type|post|buy -> [User, Caregiver], each [results, impressions, clicksAll, linkClicks, engagements, budgetUsed, reach]
-const ACTUAL = {
-  'Social post|1|Click':       [[1532,48820,1532,1455,2047,6430500,31600],[1468,43795,1468,1439,1666,6430500,33310]],
-  'Social post|1|Impression':  [[169998,169998,481,179,242,4550000,106106],[163487,163487,370,107,167,4550000,91338]],
-  'Social post|2|Click':       [[1495,48786,1495,1465,1709,6430500,35269],[1490,41783,1490,1421,1614,6430500,32669]],
-  'Social post|2|Impression':  [[168338,168338,548,178,238,4550000,115563],[164206,164206,529,191,228,4550000,120021]],
-  'Social post|3|Click':       [[1471,36105,1471,1380,1673,6430500,25580],[1443,23920,1443,1003,1066,6430500,19535]],
-  'Social post|3|Impression':  [[172687,172687,713,208,374,4550000,109269],[170734,170734,798,345,415,4550000,140626]],
-  'Social post|29|Impression': [[173948,173948,715,290,403,4550000,111875],[164988,164988,476,189,262,4550000,106865]],
-  'Social post|29|Click':      [[1478,39746,1478,1390,1477,6430500,34632],[1472,41260,1472,1307,1917,6430500,26446]],
-  'Social post|4|Impression':  [[181831,181831,641,0,251,4550000,100480],[174370,174370,495,2,202,4550000,98473]],
-  'Social post|5|Click':       [[0,0,0,0,0,0,0],[605,11780,713,605,637,2722500,9745]],
-  'Social post|5|Impression':  [[150225,150225,446,166,257,4206300,72085],[164615,164615,609,218,282,4550000,92244]],
-  'Social post|6|Click':       [[1605,59182,2203,1605,2056,6430500,38811],[1272,43788,1559,1272,1441,5724000,31919]],
-  'Social post|6|Impression':  [[176188,176188,759,344,429,4550000,133851],[181803,181803,802,396,494,4550000,186298]]
-};
-// post -> link to the published post
-const POST_LINK = {
-  '1':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid02CCV69URaG21VRAxSRJET8d2qN1WAmAcypFaJ1gGTueBQdjemdstocNznMDV6Qykl',
-  '2':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0ZGGtkNMYbrz7KFUHwgkqc2wh7FUxLxXAnJrBb6FQTTav5ADmvBV29XUbUoABTeVhl',
-  '3':  'https://www.facebook.com/photo/?fbid=1370726258542116&set=a.585043720443711',
-  '29': 'https://www.facebook.com/omronhealthcarevn/posts/pfbid0tC4aXpTugm7H9p4V5vaWiMjkEg8GZF8QtwoeoSGkkPRVLXDENohPZBHtZ71JN8CKl',
-  '4':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0t9Z6D3Du3hDAVF25XqmDMmGeHdZ6gUC878ddrnwWaJWzgAMaVo8D2UfpEekgLRKnl',
-  '6':  'https://www.facebook.com/omronhealthcarevn/posts/pfbid0mx2ztKv2Y3EZ88kGSuysvGg43FmScC2mRFMJFTKVrrftmxM3aDhJoQ3uDe2W87erl'
-};
+<!-- DATA: the only block that changes when the sheet changes. Same columns as the report sheet,
+     one row per ad set (two audiences per post and buying type). Everything shown on the page is
+     calculated from this block by the formulas in the script below. -->
+<script type="application/json" id="data">
+{
+"campaign": {"name":"IQ & ECG Campaign 2026","start":"2026-09-01","end":"2027-03-31","asOf":"2026-10-07"},
+"kpi": [["Facebook","Impression",12500000,350000000],["Facebook","Thruplay",500000,110000000],["Facebook","Click",80000,360000000],["TikTok","View 2s",1500000,90000000]],
+"columns": ["Month","Product","Channel","Buying Type","Format","Type","TA","Post #","Plan KPI","Results","Impr","Reach","Clicks (All)","Link Clicks","Views","Engagements"],
+"rows": [
+["09/2026","IQBT","Facebook","Click","Single","Social post","User",1,1429,1532,48820,31600,1532,1455,0,2047],
+["09/2026","IQBT","Facebook","Click","Single","Social post","Caregiver",1,1429,1468,43795,33310,1468,1439,0,1666],
+["09/2026","IQBT","Facebook","Impression","Single","Social post","User",1,162500,169998,169998,106106,481,179,0,242],
+["09/2026","IQBT","Facebook","Impression","Single","Social post","Caregiver",1,162500,163487,163487,91338,370,107,0,167],
+["09/2026","Complete","Facebook","Click","Single","Social post","User",2,1429,1495,48786,35269,1495,1465,0,1709],
+["09/2026","Complete","Facebook","Click","Single","Social post","Caregiver",2,1429,1490,41783,32669,1490,1421,0,1614],
+["09/2026","Complete","Facebook","Impression","Single","Social post","User",2,162500,168338,168338,115563,548,178,0,238],
+["09/2026","Complete","Facebook","Impression","Single","Social post","Caregiver",2,162500,164206,164206,120021,529,191,0,228],
+["09/2026","7383T1","Facebook","Click","Single","Social post","User",3,1429,1471,36105,25580,1471,1380,0,1673],
+["09/2026","7383T1","Facebook","Click","Single","Social post","Caregiver",3,1429,1443,23920,19535,1443,1003,0,1066],
+["09/2026","7383T1","Facebook","Impression","Single","Social post","User",3,162500,172687,172687,109269,713,208,0,374],
+["09/2026","7383T1","Facebook","Impression","Single","Social post","Caregiver",3,162500,170734,170734,140626,798,345,0,415],
+["09/2026","Promotion","Facebook","Click","Single","Social post","User",29,1429,1478,39746,34632,1478,1390,0,1477],
+["09/2026","Promotion","Facebook","Click","Single","Social post","Caregiver",29,1429,1472,41260,26446,1472,1307,0,1917],
+["09/2026","Promotion","Facebook","Impression","Single","Social post","User",29,162500,173948,173948,111875,715,290,0,403],
+["09/2026","Promotion","Facebook","Impression","Single","Social post","Caregiver",29,162500,164988,164988,106865,476,189,0,262],
+["09/2026","Complete, 1L, 6L","Facebook","Impression","Album","Social post","User",4,162500,181831,181831,100480,641,0,0,251],
+["09/2026","Complete, 1L, 6L","Facebook","Impression","Album","Social post","Caregiver",4,162500,174370,174370,98473,495,2,0,202],
+["10/2026","IQBT","Facebook","Click","Single","Social post","User",5,1429,0,0,0,0,0,0,0],
+["10/2026","IQBT","Facebook","Click","Single","Social post","Caregiver",5,1429,1022,19697,15354,1215,1022,0,1082],
+["10/2026","IQBT","Facebook","Impression","Single","Social post","User",5,162500,182182,182182,81651,551,212,0,323],
+["10/2026","IQBT","Facebook","Impression","Single","Social post","Caregiver",5,162500,165129,165129,92297,613,221,0,285],
+["10/2026","ECG 1L","Facebook","Click","Single","Social post","User",6,1429,1605,59182,38811,2203,1605,0,2056],
+["10/2026","ECG 1L","Facebook","Click","Single","Social post","Caregiver",6,1429,1272,43788,31919,1559,1272,0,1441],
+["10/2026","ECG 1L","Facebook","Impression","Single","Social post","User",6,162500,176188,176188,133851,759,344,0,429],
+["10/2026","ECG 1L","Facebook","Impression","Single","Social post","Caregiver",6,162500,181803,181803,186298,802,396,0,494],
+["10/2026","Complete","Facebook","Click","Album","Social post","User",7,1429,0,0,0,0,0,0,0],
+["10/2026","Complete","Facebook","Click","Album","Social post","Caregiver",7,1429,0,0,0,0,0,0,0],
+["10/2026","Complete","Facebook","Impression","Album","Social post","User",7,162500,0,0,0,0,0,0,0],
+["10/2026","Complete","Facebook","Impression","Album","Social post","Caregiver",7,162500,0,0,0,0,0,0,0],
+["10/2026","IQBT + 7383T1","Facebook","Click","Album","Social post","User",8,1429,0,0,0,0,0,0,0],
+["10/2026","IQBT + 7383T1","Facebook","Click","Album","Social post","Caregiver",8,1429,0,0,0,0,0,0,0],
+["10/2026","IQBT + 7383T1","Facebook","Impression","Album","Social post","User",8,162500,0,0,0,0,0,0,0],
+["10/2026","IQBT + 7383T1","Facebook","Impression","Album","Social post","Caregiver",8,162500,0,0,0,0,0,0,0],
+["10/2026","ECG 6L","Facebook","Click","Album","Social post","User",9,1429,0,0,0,0,0,0,0],
+["10/2026","ECG 6L","Facebook","Click","Album","Social post","Caregiver",9,1429,0,0,0,0,0,0,0],
+["10/2026","ECG 6L","Facebook","Impression","Album","Social post","User",9,162500,0,0,0,0,0,0,0],
+["10/2026","ECG 6L","Facebook","Impression","Album","Social post","Caregiver",9,162500,0,0,0,0,0,0,0],
+["10/2026","ECG 1L","Facebook","Click","Album","Social post","User",10,1429,0,0,0,0,0,0,0],
+["10/2026","ECG 1L","Facebook","Click","Album","Social post","Caregiver",10,1429,0,0,0,0,0,0,0],
+["10/2026","ECG 1L","Facebook","Impression","Album","Social post","User",10,162500,0,0,0,0,0,0,0],
+["10/2026","ECG 1L","Facebook","Impression","Album","Social post","Caregiver",10,162500,0,0,0,0,0,0,0],
+["11/2026","Complete, 1L, 6L","Facebook","Click","Album","Social post","User",11,1429,0,0,0,0,0,0,0],
+["11/2026","Complete, 1L, 6L","Facebook","Click","Album","Social post","Caregiver",11,1429,0,0,0,0,0,0,0],
+["11/2026","Complete, 1L, 6L","Facebook","Impression","Album","Social post","User",11,162500,0,0,0,0,0,0,0],
+["11/2026","Complete, 1L, 6L","Facebook","Impression","Album","Social post","Caregiver",11,162500,0,0,0,0,0,0,0],
+["11/2026","7383T1","Facebook","Click","GIF","Social post","User",12,1429,0,0,0,0,0,0,0],
+["11/2026","7383T1","Facebook","Click","GIF","Social post","Caregiver",12,1429,0,0,0,0,0,0,0],
+["11/2026","7383T1","Facebook","Impression","GIF","Social post","User",12,162500,0,0,0,0,0,0,0],
+["11/2026","7383T1","Facebook","Impression","GIF","Social post","Caregiver",12,162500,0,0,0,0,0,0,0],
+["11/2026","7383T1","TikTok","View 2s","GIF","Social post","User",12,37500,0,0,0,0,0,0,0],
+["11/2026","7383T1","TikTok","View 2s","GIF","Social post","Caregiver",12,37500,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Click","GIF","Social post","User",13,1429,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Click","GIF","Social post","Caregiver",13,1429,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Impression","GIF","Social post","User",13,162500,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Impression","GIF","Social post","Caregiver",13,162500,0,0,0,0,0,0,0],
+["11/2026","IQBT","TikTok","View 2s","GIF","Social post","User",13,37500,0,0,0,0,0,0,0],
+["11/2026","IQBT","TikTok","View 2s","GIF","Social post","Caregiver",13,37500,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Click","Album","Social post","User",14,1429,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Click","Album","Social post","Caregiver",14,1429,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Impression","Album","Social post","User",14,162500,0,0,0,0,0,0,0],
+["11/2026","IQBT","Facebook","Impression","Album","Social post","Caregiver",14,162500,0,0,0,0,0,0,0],
+["12/2026","7383T1","Facebook","Click","Single","Social post","User",15,1429,0,0,0,0,0,0,0],
+["12/2026","7383T1","Facebook","Click","Single","Social post","Caregiver",15,1429,0,0,0,0,0,0,0],
+["12/2026","7383T1","Facebook","Impression","Single","Social post","User",15,162500,0,0,0,0,0,0,0],
+["12/2026","7383T1","Facebook","Impression","Single","Social post","Caregiver",15,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","Album","Social post","User",16,1429,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","Album","Social post","Caregiver",16,1429,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","Album","Social post","User",16,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","Album","Social post","Caregiver",16,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","GIF","Social post","User",17,1428,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","GIF","Social post","Caregiver",17,1428,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","GIF","Social post","User",17,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","GIF","Social post","Caregiver",17,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","TikTok","View 2s","GIF","Social post","User",17,37500,0,0,0,0,0,0,0],
+["12/2026","IQBT","TikTok","View 2s","GIF","Social post","Caregiver",17,37500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","Album","Social post","User",18,1428,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Click","Album","Social post","Caregiver",18,1428,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","Album","Social post","User",18,162500,0,0,0,0,0,0,0],
+["12/2026","IQBT","Facebook","Impression","Album","Social post","Caregiver",18,162500,0,0,0,0,0,0,0],
+["01/2027","7383T1","Facebook","Click","Single","Social post","User",19,1428,0,0,0,0,0,0,0],
+["01/2027","7383T1","Facebook","Click","Single","Social post","Caregiver",19,1428,0,0,0,0,0,0,0],
+["01/2027","7383T1","Facebook","Impression","Single","Social post","User",19,162500,0,0,0,0,0,0,0],
+["01/2027","7383T1","Facebook","Impression","Single","Social post","Caregiver",19,162500,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Click","Single","Social post","User",20,1428,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Click","Single","Social post","Caregiver",20,1428,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Impression","Single","Social post","User",20,162500,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Impression","Single","Social post","Caregiver",20,162500,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Click","Album","Social post","User",21,1428,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Click","Album","Social post","Caregiver",21,1428,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Impression","Album","Social post","User",21,162500,0,0,0,0,0,0,0],
+["01/2027","IQBT","Facebook","Impression","Album","Social post","Caregiver",21,162500,0,0,0,0,0,0,0],
+["01/2027","Complete","Facebook","Click","Album","Social post","User",22,1428,0,0,0,0,0,0,0],
+["01/2027","Complete","Facebook","Click","Album","Social post","Caregiver",22,1428,0,0,0,0,0,0,0],
+["01/2027","Complete","Facebook","Impression","Album","Social post","User",22,162500,0,0,0,0,0,0,0],
+["01/2027","Complete","Facebook","Impression","Album","Social post","Caregiver",22,162500,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Click","Single","Social post","User",23,1428,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Click","Single","Social post","Caregiver",23,1428,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Impression","Single","Social post","User",23,162500,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Impression","Single","Social post","Caregiver",23,162500,0,0,0,0,0,0,0],
+["02/2027","ECG 6L","Facebook","Click","Album","Social post","User",24,1428,0,0,0,0,0,0,0],
+["02/2027","ECG 6L","Facebook","Click","Album","Social post","Caregiver",24,1428,0,0,0,0,0,0,0],
+["02/2027","ECG 6L","Facebook","Impression","Album","Social post","User",24,162500,0,0,0,0,0,0,0],
+["02/2027","ECG 6L","Facebook","Impression","Album","Social post","Caregiver",24,162500,0,0,0,0,0,0,0],
+["02/2027","7383T1","Facebook","Click","GIF","Social post","User",25,1428,0,0,0,0,0,0,0],
+["02/2027","7383T1","Facebook","Click","GIF","Social post","Caregiver",25,1428,0,0,0,0,0,0,0],
+["02/2027","7383T1","Facebook","Impression","GIF","Social post","User",25,162500,0,0,0,0,0,0,0],
+["02/2027","7383T1","Facebook","Impression","GIF","Social post","Caregiver",25,162500,0,0,0,0,0,0,0],
+["02/2027","7383T1","TikTok","View 2s","GIF","Social post","User",25,37500,0,0,0,0,0,0,0],
+["02/2027","7383T1","TikTok","View 2s","GIF","Social post","Caregiver",25,37500,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Click","Single","Social post","User",26,1428,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Click","Single","Social post","Caregiver",26,1428,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Impression","Single","Social post","User",26,162500,0,0,0,0,0,0,0],
+["02/2027","IQBT","Facebook","Impression","Single","Social post","Caregiver",26,162500,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","Facebook","Click","GIF","Social post","User",27,1428,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","Facebook","Click","GIF","Social post","Caregiver",27,1428,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","Facebook","Impression","GIF","Social post","User",27,162500,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","Facebook","Impression","GIF","Social post","Caregiver",27,162500,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","TikTok","View 2s","GIF","Social post","User",27,37500,0,0,0,0,0,0,0],
+["03/2027","ECG 6L","TikTok","View 2s","GIF","Social post","Caregiver",27,37500,0,0,0,0,0,0,0],
+["03/2027","ECG 1L","Facebook","Click","Album","Social post","User",28,1428,0,0,0,0,0,0,0],
+["03/2027","ECG 1L","Facebook","Click","Album","Social post","Caregiver",28,1428,0,0,0,0,0,0,0],
+["03/2027","ECG 1L","Facebook","Impression","Album","Social post","User",28,162500,0,0,0,0,0,0,0],
+["03/2027","ECG 1L","Facebook","Impression","Album","Social post","Caregiver",28,162500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","User",1,62500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","Caregiver",1,62500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","User",2,62500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","Caregiver",2,62500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","User",3,62500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Thruplay","Video","HCP","Caregiver",3,62500,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Thruplay","Video","HCP","User",4,62500,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Thruplay","Video","HCP","Caregiver",4,62500,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","HCP","User",5,150000,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","HCP","Caregiver","5 Full",150000,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","User",1,37500,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","Caregiver",1,37500,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","User",2,37500,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","Caregiver",2,37500,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","User",3,37500,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","HCP","Caregiver",3,37500,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","HCP","User",4,37500,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","HCP","Caregiver",4,37500,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","HCP","User","5 Full",37500,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","HCP","Caregiver",5,37500,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","User",1,154167,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",1,154167,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","User",1,41667,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",1,41667,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","User",2,154167,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",2,154167,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","User",2,41667,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",2,41667,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","User",3,154167,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",3,154167,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","User",3,41667,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",3,41667,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","User",4,154167,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",4,154167,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","User",4,41667,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",4,41667,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","User",5,154167,0,0,0,0,0,0,0],
+["10/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",5,154167,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","User",5,41667,0,0,0,0,0,0,0],
+["10/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",5,41667,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","User",6,154167,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",6,154167,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","User",6,41667,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",6,41667,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","User",7,154166,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",7,154166,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","User",7,41666,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",7,41666,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","User",8,154166,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",8,154166,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","User",8,41666,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",8,41666,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","User",9,154166,0,0,0,0,0,0,0],
+["11/2026","None","Facebook","Impression","Video","Cut Video","Caregiver",9,154166,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","User",9,41666,0,0,0,0,0,0,0],
+["11/2026","None","TikTok","View 2s","Video","Cut Video","Caregiver",9,41666,0,0,0,0,0,0,0]
+],
+"links": [
+["Social post","1","","https://www.facebook.com/omronhealthcarevn/posts/pfbid02CCV69URaG21VRAxSRJET8d2qN1WAmAcypFaJ1gGTueBQdjemdstocNznMDV6Qykl"],
+["Social post","2","","https://www.facebook.com/omronhealthcarevn/posts/pfbid0ZGGtkNMYbrz7KFUHwgkqc2wh7FUxLxXAnJrBb6FQTTav5ADmvBV29XUbUoABTeVhl"],
+["Social post","3","","https://www.facebook.com/photo/?fbid=1370726258542116&set=a.585043720443711"],
+["Social post","29","Impression","https://www.facebook.com/omronhealthcarevn/posts/pfbid0tC4aXpTugm7H9p4V5vaWiMjkEg8GZF8QtwoeoSGkkPRVLXDENohPZBHtZ71JN8CKl"],
+["Social post","29","Click","https://www.facebook.com/omronhealthcarevn/posts/pfbid02UCixhNbtz4EADSD7s5dJs9mPrzPxCpoMxU7pZymDeK6NYoYHwSGmK953Y9kjAV1Hl"],
+["Social post","4","","https://www.facebook.com/omronhealthcarevn/posts/pfbid0t9Z6D3Du3hDAVF25XqmDMmGeHdZ6gUC878ddrnwWaJWzgAMaVo8D2UfpEekgLRKnl"],
+["Social post","6","","https://www.facebook.com/omronhealthcarevn/posts/pfbid0mx2ztKv2Y3EZ88kGSuysvGg43FmScC2mRFMJFTKVrrftmxM3aDhJoQ3uDe2W87erl"]
+]
+}
+</script>
 
-/* ---------- model ---------- */
-function buildRows() {
-  const rows = [];
-  const add = (month, product, channel, buy, format, type, post, plan) =>
-    rows.push({ month, product, channel, buy, format, type, post: String(post), plan });
-  for (const [post, month, product, format] of SOCIAL) {
-    const clickKpi = (post >= 17 && post <= 28) ? 2856 : 2858;
-    if (!NO_CLICK.includes(post)) add(month, product, 'Facebook', 'Click', format, 'Social post', post, clickKpi);
-    add(month, product, 'Facebook', 'Impression', format, 'Social post', post, 325000);
-    if (TIKTOK_POSTS.includes(post)) add(month, product, 'TikTok', 'View 2s', format, 'Social post', post, 75000);
-  }
-  for (const [post, month] of [[1,'2026-10'],[2,'2026-10'],[3,'2026-10'],[4,'2026-11']])
-    add(month, 'None', 'Facebook', 'Thruplay', 'Video', 'HCP', post, 125000);
-  add('2026-11', 'None', 'Facebook', 'Impression', 'Video', 'HCP', 5, 300000);
-  for (const [post, month] of [[1,'2026-10'],[2,'2026-10'],[3,'2026-10'],[4,'2026-11'],[5,'2026-11']])
-    add(month, 'None', 'TikTok', 'View 2s', 'Video', 'HCP', post, 75000);
-  for (let p = 1; p <= 9; p++) {
-    const month = p <= 5 ? '2026-10' : '2026-11';
-    add(month, 'None', 'Facebook', 'Impression', 'Video', 'Cut Video', p, p <= 6 ? 308334 : 308332);
-    add(month, 'None', 'TikTok', 'View 2s', 'Video', 'Cut Video', p, p <= 6 ? 83334 : 83332);
-  }
-  for (const r of rows) {
-    r.budget = r.plan * RATE[r.buy];
-    const a = ACTUAL[r.type + '|' + r.post + '|' + r.buy];
-    if (a) {
-      const f = i => a[0][i] + a[1][i];
-      r.actual = { results: f(0), impr: f(1), clicks: f(2), link: f(3), eng: f(4), used: f(5), reach: f(6), ta: { User: a[0], Caregiver: a[1] } };
-    } else r.actual = null;
-  }
-  return rows;
+<script id="model">
+/* ---------- settings ---------- */
+// status thresholds: progress as a share of the project runrate, in percent
+const PACE = { onTrack: 95, atRisk: 80 };
+const STATUS_LABEL = { on: 'On track', risk: 'At risk', behind: 'Behind plan', none: 'Not started' };
+const KPI_NAME = { 'Impression': 'Impressions', 'Click': 'Clicks', 'Thruplay': 'ThruPlays', 'View 2s': '2-second views' };
+const CHANNEL_COLOR = { 'Facebook': '#1877F2', 'TikTok': '#000000' };
+const TYPE_ORDER = ['Social post', 'HCP', 'Cut Video'];
+const BUY_ORDER = ['Click', 'Impression', 'Thruplay', 'View 2s'];
+
+/* ---------- formulas ---------- */
+const num = v => typeof v === 'number' ? v : (Number(String(v == null ? '' : v).replace(/[^0-9.\-]/g, '')) || 0);
+function monthKey(v) { // accepts 09/2026 or 2026-09
+  const s = String(v).trim(); let m;
+  if ((m = s.match(/^(\d{1,2})\/(\d{4})$/))) return m[2] + '-' + m[1].padStart(2, '0');
+  if ((m = s.match(/^(\d{4})-(\d{1,2})/))) return m[1] + '-' + m[2].padStart(2, '0');
+  return s;
 }
 function dayNumber(iso) { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 86400000; }
-function buildModel() {
-  const rows = buildRows();
-  const totalDays = dayNumber(CAMPAIGN.end) - dayNumber(CAMPAIGN.start) + 1;
-  const elapsedDays = dayNumber(CAMPAIGN.asOf) - dayNumber(CAMPAIGN.start) + 1;
-  const m = { rows, totalDays, elapsedDays, elapsedPct: elapsedDays / totalDays * 100,
-    byBuy: {}, byMonth: {}, budget: 0, used: 0, impr: 0, clicks: 0, eng: 0, reach: 0, clickCampClicks: 0, clickCampImpr: 0 };
-  for (const b of BUYS) m.byBuy[b] = { plan: 0, results: 0, budget: 0, used: 0 };
-  for (const mo of MONTHS) {
-    m.byMonth[mo] = { budget: 0, used: 0, buy: {}, assets: { 'Social post': new Set(), 'HCP': new Set(), 'Cut Video': new Set() } };
-    for (const b of BUYS) m.byMonth[mo].buy[b] = { plan: 0, results: 0 };
+function monthsBetween(start, end) {
+  const out = []; let [y, m] = start.split('-').map(Number); const [ey, em] = end.split('-').map(Number);
+  while (y < ey || (y === ey && m <= em)) { out.push(y + '-' + String(m).padStart(2, '0')); if (++m > 12) { m = 1; y++; } }
+  return out;
+}
+function paceStatus(pct, run, started) {
+  if (!started) return 'none';
+  const pace = run ? pct / run * 100 : 0;
+  return pace >= PACE.onTrack ? 'on' : pace >= PACE.atRisk ? 'risk' : 'behind';
+}
+function buildModel(DATA) {
+  const col = name => DATA.columns.indexOf(name);
+  const C = { month: col('Month'), product: col('Product'), channel: col('Channel'), buy: col('Buying Type'), format: col('Format'), type: col('Type'),
+    post: col('Post #'), plan: col('Plan KPI'), results: col('Results'), impr: col('Impr'), reach: col('Reach'), clicks: col('Clicks (All)'),
+    link: col('Link Clicks'), views: col('Views'), eng: col('Engagements') };
+  // committed KPI and budget per channel and buying type; unit rate = budget / KPI
+  const lines = DATA.kpi.map(([channel, buy, kpi, budget]) => ({ channel, buy, plan: num(kpi), budget: num(budget), rate: num(budget) / num(kpi), results: 0, used: 0, rowPlan: 0 }));
+  const lineOf = {}; lines.forEach(l => { lineOf[l.buy] = l; });
+  const buys = lines.map(l => l.buy);
+  const months = monthsBetween(DATA.campaign.start.slice(0, 7), DATA.campaign.end.slice(0, 7));
+  const totalDays = dayNumber(DATA.campaign.end) - dayNumber(DATA.campaign.start) + 1;
+  const elapsedDays = Math.max(0, Math.min(totalDays, dayNumber(DATA.campaign.asOf) - dayNumber(DATA.campaign.start) + 1));
+  const run = elapsedDays / totalDays * 100;
+  // post links: the link of the same buying type first, otherwise the post's only link
+  const linkExact = {}, linkAny = {};
+  (DATA.links || []).forEach(([type, post, buy, url]) => {
+    const p = (String(post).match(/\d+/) || [''])[0];
+    if (buy) linkExact[type + '|' + p + '|' + buy] = url;
+    (linkAny[type + '|' + p] = linkAny[type + '|' + p] || new Set()).add(url);
+  });
+
+  // one row per post and buying type: its ad sets (audiences) added together
+  const byKey = new Map();
+  for (const a of DATA.rows) {
+    const postNo = (String(a[C.post]).match(/\d+/) || [''])[0];
+    const rec = { month: monthKey(a[C.month]), product: a[C.product], channel: a[C.channel], buy: a[C.buy], format: a[C.format], type: a[C.type], post: postNo };
+    const key = [rec.month, rec.product, rec.channel, rec.buy, rec.format, rec.type, rec.post].join('|');
+    let r = byKey.get(key);
+    if (!r) { r = Object.assign(rec, { label: String(a[C.post]), plan: 0, results: 0, impr: 0, reach: 0, clicks: 0, link: 0, views: 0, eng: 0, used: 0 }); byKey.set(key, r); }
+    const plan = num(a[C.plan]), results = num(a[C.results]), rate = lineOf[rec.buy] ? lineOf[rec.buy].rate : 0;
+    if (String(a[C.post]).length > r.label.length) r.label = String(a[C.post]);   // keep the fuller label, whatever the row order
+    r.plan += plan; r.results += results; r.impr += num(a[C.impr]); r.reach += num(a[C.reach]); r.clicks += num(a[C.clicks]);
+    r.link += num(a[C.link]); r.views += num(a[C.views]); r.eng += num(a[C.eng]);
+    r.used += Math.min(results, plan) * rate;            // budget used: delivered KPI x unit rate, capped at the plan of each ad set
   }
-  const assetsAll = new Set(), assetsLive = new Set();
+  const rows = Array.from(byKey.values());
+  const m = { campaign: DATA.campaign, rows, months, buys, lines, lineOf, totalDays, elapsedDays, elapsedPct: run,
+    byMonth: {}, budget: 0, used: 0, impr: 0, clicks: 0, eng: 0, reach: 0, views: 0 };
+  for (const mo of months) m.byMonth[mo] = { budget: 0, used: 0 };
   for (const r of rows) {
-    const B = m.byBuy[r.buy], M = m.byMonth[r.month];
-    B.plan += r.plan; B.budget += r.budget; M.budget += r.budget; M.buy[r.buy].plan += r.plan; m.budget += r.budget;
-    M.assets[r.type].add(r.post); assetsAll.add(r.type + '|' + r.post);
-    if (r.actual) {
-      B.results += r.actual.results; B.used += r.actual.used; M.used += r.actual.used; M.buy[r.buy].results += r.actual.results;
-      m.used += r.actual.used; m.impr += r.actual.impr; m.clicks += r.actual.clicks; m.eng += r.actual.eng; m.reach += r.actual.reach;
-      if (r.buy === 'Click') { m.clickCampClicks += r.actual.clicks; m.clickCampImpr += r.actual.impr; }
-      if (r.actual.impr > 0) assetsLive.add(r.type + '|' + r.post);
-    }
+    r.name = r.type + ' · ' + r.format + ' ' + r.label;
+    r.pct = r.plan ? r.results / r.plan * 100 : 0;                         // %KPI Achieve
+    r.fre = r.reach ? r.impr / r.reach : null;                              // frequency
+    r.status = r.results === 0 ? 'none' : r.pct >= 100 ? 'met' : 'below';
+    r.budget = r.plan * (lineOf[r.buy] ? lineOf[r.buy].rate : 0);           // planned budget of the row
+    const any = linkAny[r.type + '|' + r.post];
+    r.link_url = linkExact[r.type + '|' + r.post + '|' + r.buy] || (r.channel === 'Facebook' && any && any.size === 1 ? Array.from(any)[0] : '') || '';
+    const L = lineOf[r.buy], M = m.byMonth[r.month];
+    if (L) { L.results += r.results; L.used += r.used; L.rowPlan += r.plan; }
+    if (M) { M.budget += r.budget; M.used += r.used; }
+    m.used += r.used; m.impr += r.impr; m.clicks += r.clicks; m.eng += r.eng; m.reach += r.reach; m.views += r.views;
   }
-  m.assetsAll = assetsAll.size; m.assetsLive = assetsLive.size;
-  m.rowPlan = {}; m.budget = 0;
-  for (const b of BUYS) { m.rowPlan[b] = { plan: m.byBuy[b].plan, budget: m.byBuy[b].budget }; m.byBuy[b].plan = SOLD[b].kpi; m.byBuy[b].budget = SOLD[b].budget; m.budget += SOLD[b].budget; }
-  // posts delivered
-  const posts = {};
-  for (const r of rows) {
-    if (!r.actual || r.type !== 'Social post') continue;
-    const p = posts[r.post] || (posts[r.post] = { post: r.post, product: r.product, format: r.format, month: r.month, impr: 0, clicks: 0, eng: 0, reach: 0 });
-    p[r.buy] = r; p.impr += r.actual.impr; p.clicks += r.actual.clicks; p.eng += r.actual.eng; p.reach += r.actual.reach;
+  for (const l of lines) {
+    m.budget += l.budget;
+    l.pct = l.plan ? l.results / l.plan * 100 : 0;                          // % achieved
+    l.status = paceStatus(l.pct, run, l.results > 0);                       // against the project runrate
+    l.usedPct = l.budget ? l.used / l.budget * 100 : 0;
   }
-  const order = SOCIAL.map(r => String(r[0]));
-  m.posts = Object.values(posts).sort((a, b) => order.indexOf(a.post) - order.indexOf(b.post));
-  // by product, by audience
-  const prod = {}, aud = { User: { impr: 0, clicks: 0, eng: 0, reach: 0 }, Caregiver: { impr: 0, clicks: 0, eng: 0, reach: 0 } };
-  for (const r of rows) {
-    if (!r.actual) continue;
-    const p = prod[r.product] || (prod[r.product] = { product: r.product, posts: new Set(), impr: 0, clicks: 0, eng: 0, reach: 0 });
-    p.posts.add(r.post); p.impr += r.actual.impr; p.clicks += r.actual.clicks; p.eng += r.actual.eng; p.reach += r.actual.reach;
-    for (const t of ['User', 'Caregiver']) { const a = r.actual.ta[t]; aud[t].impr += a[1]; aud[t].clicks += a[2]; aud[t].eng += a[4]; aud[t].reach += a[6]; }
-  }
-  m.products = Object.values(prod).sort((a, b) => b.impr - a.impr);
-  m.audiences = aud;
+  m.spendPct = m.budget ? m.used / m.budget * 100 : 0;
+  rows.sort((a, b) => a.month.localeCompare(b.month) || TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) ||
+    Number(a.post) - Number(b.post) || a.channel.localeCompare(b.channel) || BUY_ORDER.indexOf(a.buy) - BUY_ORDER.indexOf(b.buy));
   return m;
 }
-if (typeof module !== 'undefined') module.exports = { buildModel, MONTHS, BUYS, SOLD };
+
+/* ---------- Excel export: a minimal .xlsx (one sheet, stored zip) ---------- */
+function crc32(u8) {
+  let crc = ~0;
+  for (let i = 0; i < u8.length; i++) { let c = (crc ^ u8[i]) & 0xff; for (let k = 0; k < 8; k++) c = c & 1 ? (c >>> 1) ^ 0xEDB88320 : c >>> 1; crc = (crc >>> 8) ^ c; }
+  return ~crc >>> 0;
+}
+function zipStore(files) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(12, 0x21, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(lh.buffer), name, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(14, 0x21, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + data.length;
+  }
+  const csize = central.reduce((a, b) => a + b.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, csize, true); end.setUint32(16, offset, true);
+  return [...parts, ...central, new Uint8Array(end.buffer)];
+}
+function xlsxParts(header, body) {
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const cell = v => typeof v === 'number' ? '<c><v>' + v + '</v></c>' : '<c t="inlineStr"><is><t xml:space="preserve">' + esc(v) + '</t></is></c>';
+  const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' +
+    [header].concat(body).map(r => '<row>' + r.map(cell).join('') + '</row>').join('') + '</sheetData></worksheet>';
+  return zipStore([
+    { name: '[Content_Types].xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>' },
+    { name: '_rels/.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+    { name: 'xl/workbook.xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Detail" sheetId="1" r:id="rId1"/></sheets></workbook>' },
+    { name: 'xl/_rels/workbook.xml.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>' },
+    { name: 'xl/worksheets/sheet1.xml', text: sheet }
+  ]);
+}
+if (typeof module !== 'undefined') module.exports = { buildModel, xlsxParts };
 </script>
 
 <script>
 (function () {
-  /* Logo image links. Paste a link between the quotes; an empty slot shows a placeholder box. */
-  const LOGO = {
-    client: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/OMRON_Logo.svg/960px-OMRON_Logo.svg.png?utm_source=vi.wikipedia.org&utm_campaign=index&utm_content=thumbnail',   // OMRON logo
-    agency: 'https://hedima.vn/journey/wp-content/uploads/2025/12/LOGO-HEDIMA_UPDATE-SLOGAN-1024x254.webp'    // Hedima logo
-  };
+  /* Logo image link. Paste a link between the quotes; an empty slot shows a placeholder box. */
+  const LOGO = { client: '' };   // OMRON logo
+  /* Live data. Paste the Apps Script web app link (ends in /exec) between the quotes.
+     Left empty, the page shows the data block built into this file. */
+  const DATA_URL = '';
 
-  const M = buildModel();
+  const wrap = document.querySelector('.wrap'), SHELL = wrap.innerHTML;
+  let currentTab = (location.hash || '').slice(1) || 'overall';
+
+  function render(DATA, stamp) {
+  const M = buildModel(DATA);
   const $ = id => document.getElementById(id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const int = n => Math.round(n).toLocaleString('en-US');
@@ -392,23 +592,33 @@ if (typeof module !== 'undefined') module.exports = { buildModel, MONTHS, BUYS, 
   const ratio = (a, b) => b ? a / b * 100 : 0;
   const vndM = n => n === 0 ? '0' : (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
   const vndCap = n => Math.round(n / 1e6) + 'M';
+  const dong = n => int(n) + 'đ';
+  const compact = n => n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : int(n);
   const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const monthName = (mo, long) => { const [y, m] = mo.split('-').map(Number);
-    return long ? MON[m - 1] + ' ' + y : MON[m - 1] + (m === 1 || mo === MONTHS[0] ? " '" + String(y).slice(2) : ''); };
-  const CHANNEL_OF = { 'Impression': 'Facebook', 'Thruplay': 'Facebook', 'Click': 'Facebook', 'View 2s': 'TikTok' };
+    return long ? MON[m - 1] + ' ' + y : MON[m - 1] + (m === 1 || mo === M.months[0] ? " '" + String(y).slice(2) : ''); };
   const RUN = M.elapsedPct;
+  const kpiName = b => KPI_NAME[b] || b;
+  const channelTag = (name, cls) => { const s = el('span', 'ch ' + (cls || ''), name); s.style.color = CHANNEL_COLOR[name] || 'inherit'; return s; };
 
-  /* logos */
-  function logo(id, url, name) {
-    const box = $(id); box.textContent = name + ' logo';
-    if (!url) return;
-    const img = new Image(); img.alt = name;
+  /* header */
+  $('campaignName').textContent = DATA.campaign.name;
+  (function () {
+    const box = $('logoClient'); box.textContent = 'OMRON logo';
+    if (!LOGO.client) return;
+    const img = new Image(); img.alt = 'OMRON';
     img.onload = () => { box.textContent = ''; box.classList.add('has'); box.appendChild(img); };
-    img.src = url;
-  }
-  logo('logoClient', LOGO.client, 'OMRON'); logo('logoAgency', LOGO.agency, 'Hedima');
+    img.src = LOGO.client;
+  })();
+  $('tlFill').style.width = RUN + '%';
+  $('tlNow').style.left = 'calc(' + RUN + '% - 1px)';
+  $('tlLabel').style.left = 'clamp(48px, ' + RUN + '%, calc(100% - 48px))';
+  $('tlPct').textContent = pct(RUN);
+  const daysIn = M.months.map(mo => { const [y, m] = mo.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); });
+  $('tlMonths').style.gridTemplateColumns = daysIn.map(d => d + 'fr').join(' ');
+  M.months.forEach(mo => $('tlMonths').appendChild(el('span', null, monthName(mo))));
 
-  /* tooltip */
+  /* small pieces */
   const tip = $('tip');
   function bindTip(node, title, lines) {
     const show = () => {
@@ -424,26 +634,27 @@ if (typeof module !== 'undefined') module.exports = { buildModel, MONTHS, BUYS, 
     node.addEventListener('pointerenter', show); node.addEventListener('pointerleave', hide);
     node.addEventListener('focus', show); node.addEventListener('blur', hide);
   }
-  function meter(p, mark) {
-    const m = el('div', 'meter'); const f = el('div', 'meter-fill'); f.style.width = Math.min(100, p) + '%'; m.appendChild(f);
+  function fillMeter(m, p, mark) {
+    m.textContent = ''; const f = el('div', 'meter-fill'); f.style.width = Math.min(100, p) + '%'; m.appendChild(f);
     if (mark != null) { const k = el('div', 'meter-mark'); k.style.left = 'calc(' + mark + '% - 1px)'; m.appendChild(k); }
     return m;
   }
-  /* bold percentage with a small bar and the runrate marker */
-  function pctCell(cell, p, withMark) {
+  function statusChip(code) { const s = el('span', 'status ' + code); s.appendChild(el('i')); s.appendChild(document.createTextNode(STATUS_LABEL[code])); return s; }
+  function pctCell(cell, p) {
     const box = el('div', 'pc'); box.appendChild(el('strong', null, pct(p)));
     const cb = el('div', 'cellbar'), f = el('b'); f.style.width = Math.min(100, p) + '%'; cb.appendChild(f);
-    if (withMark) { const k = el('i'); k.style.left = 'calc(' + RUN + '% - 1px)'; cb.appendChild(k); }
+    const k = el('i'); k.style.left = 'calc(' + RUN + '% - 1px)'; cb.appendChild(k);
     box.appendChild(cb); cell.appendChild(box);
   }
 
   /* section switch */
-  function wireSwitch(barId, prefix) {
-    const buttons = Array.from($(barId).querySelectorAll('button'));
+  const onShow = {};
+  const selectTab = (function () {
+    const buttons = Array.from($('tabs').querySelectorAll('button'));
     const select = name => {
       if (!buttons.some(b => b.dataset.panel === name)) return false;
-      buttons.forEach(b => { const on = b.dataset.panel === name; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; $(prefix + b.dataset.panel).hidden = !on; });
-      tip.hidden = true; return true;
+      buttons.forEach(b => { const on = b.dataset.panel === name; b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; $('panel-' + b.dataset.panel).hidden = !on; });
+      currentTab = name; tip.hidden = true; if (onShow[name]) onShow[name](); return true;
     };
     buttons.forEach((b, i) => {
       b.addEventListener('click', () => select(b.dataset.panel));
@@ -454,202 +665,170 @@ if (typeof module !== 'undefined') module.exports = { buildModel, MONTHS, BUYS, 
       });
     });
     return select;
-  }
-  const selectTab = wireSwitch('tabs', 'panel-');
-  wireSwitch('subtabs', 'sub-');
-  selectTab((location.hash || '').slice(1) || 'overall') || selectTab('overall');
-
-  /* header */
-  const [ay, am, ad] = CAMPAIGN.asOf.split('-').map(Number);
-  $('asof').textContent = ad + ' ' + MON[am - 1] + ' ' + ay;
-  $('tlFill').style.width = RUN + '%';
-  $('tlNow').style.left = 'calc(' + RUN + '% - 1px)';
-  $('tlLabel').style.left = 'clamp(48px, ' + RUN + '%, calc(100% - 48px))';
-  $('tlPct').textContent = pct(RUN);
-  $('dayOf').textContent = M.elapsedDays + ' of ' + M.totalDays;
-  const daysIn = MONTHS.map(mo => { const [y, m] = mo.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); });
-  $('tlMonths').style.gridTemplateColumns = daysIn.map(d => d + 'fr').join(' ');
-  MONTHS.forEach(mo => $('tlMonths').appendChild(el('span', null, monthName(mo))));
-
-  /* overall tiles */
-  const curMonth = CAMPAIGN.asOf.slice(0, 7);
-  const daysThisMonth = new Date(Date.UTC(ay, am, 0)).getUTCDate();
-  $('monthRun').textContent = monthName(curMonth, true) + ' ' + pct(ad / daysThisMonth * 100);
-  const tiles = [{ label: 'Budget used', sub: '', p: ratio(M.used, M.budget), of: vndM(M.used) + ' of ' + vndM(M.budget) + ' ₫' }];
-  for (const b of ['Impression', 'Click', 'Thruplay', 'View 2s']) {
-    const B = M.byBuy[b];
-    tiles.push({ label: BUY_LABEL[b][0], sub: CHANNEL_OF[b], p: ratio(B.results, B.plan), of: int(B.results) + ' of ' + int(B.plan) });
-  }
-  for (const t of tiles) {
-    const a = el('article', 'card tile');
-    const lab = el('div', 'tile-label', t.label); if (t.sub) lab.appendChild(el('small', null, t.sub)); a.appendChild(lab);
-    a.appendChild(el('div', 'tile-value', pct(t.p)));
-    a.appendChild(el('div', 'tile-of', t.of));
-    a.appendChild(meter(t.p, RUN));
-    $('tiles').appendChild(a);
-  }
-  const views = M.byBuy['Thruplay'].results + M.byBuy['View 2s'].results;
-  const strip = [
-    ['Impressions', int(M.impr)], ['Reach', int(M.reach)], ['Frequency', M.reach ? (M.impr / M.reach).toFixed(2) : '0'], ['Clicks', int(M.clicks)],
-    ['Video views', int(views)], ['Engagements', int(M.eng)], ['CTR on click campaigns', pct(ratio(M.clickCampClicks, M.clickCampImpr), 2)], ['Engagement rate', pct(ratio(M.eng, M.impr), 2)]
-  ];
-  for (const [k, v] of strip) { const d = el('div'); d.appendChild(el('span', 'k', k)); d.appendChild(el('span', 'v', v)); $('strip').appendChild(d); }
-
-  /* KPI and budget in one table */
-  (function () {
-    const t = $('kbTable'), head = t.createTHead();
-    const g = head.insertRow(); g.className = 'group';
-    [['', 2, ''], ['KPI', 4, 'edge'], ['Budget, VND', 4, 'edge']].forEach(([h, span, c]) => { const th = el('th', c, h); th.colSpan = span; g.appendChild(th); });
-    const hr = head.insertRow();
-    [['Channel', ''], ['KPI type', ''], ['Committed', 'r edge'], ['Achieved', 'r'], ['Remaining', 'r'], ['% achieved', 'r'], ['Budget', 'r edge'], ['Used', 'r'], ['Remaining', 'r'], ['% used', 'r']]
-      .forEach(([h, c]) => hr.appendChild(el('th', c, h)));
-    const tb = t.createTBody();
-    for (const b of BUYS) {
-      const B = M.byBuy[b], r = tb.insertRow();
-      r.insertCell().textContent = CHANNEL_OF[b];
-      r.insertCell().textContent = BUY_LABEL[b][0];
-      [[int(B.plan), 'r edge'], [int(B.results), 'r'], [int(Math.max(0, B.plan - B.results)), 'r']].forEach(([v, c]) => { const x = r.insertCell(); x.className = c; x.textContent = v; });
-      pctCell(r.insertCell(), ratio(B.results, B.plan), true);
-      [[int(B.budget), 'r edge'], [int(B.used), 'r'], [int(B.budget - B.used), 'r']].forEach(([v, c]) => { const x = r.insertCell(); x.className = c; x.textContent = v; });
-      pctCell(r.insertCell(), ratio(B.used, B.budget), true);
-    }
-    const f = t.createTFoot().insertRow();
-    const c0 = f.insertCell(); c0.colSpan = 2; c0.textContent = 'Total';
-    const blank = f.insertCell(); blank.colSpan = 4; blank.className = 'edge';
-    [[int(M.budget), 'r edge'], [int(M.used), 'r'], [int(M.budget - M.used), 'r']].forEach(([v, c]) => { const x = f.insertCell(); x.className = c; x.textContent = v; });
-    pctCell(f.insertCell(), ratio(M.used, M.budget), true);
   })();
 
-  /* budget chart */
-  const AX_MAX = 340e6, TICKS = [0, 100e6, 200e6, 300e6];
-  for (const t of TICKS) {
-    const s = el('span', null, t / 1e6 + 'M'); s.style.bottom = (t / AX_MAX * 100) + '%'; $('yaxis').appendChild(s);
-    if (t > 0) { const g = el('div', 'gridline'); g.style.bottom = (t / AX_MAX * 100) + '%'; $('plot').insertBefore(g, $('cols')); }
+  /* ---------- Overall ---------- */
+  $('spendPct').textContent = pct(M.spendPct);
+  fillMeter($('spendMeter'), M.spendPct, RUN);
+  $('spendUsed').textContent = vndM(M.used) + ' of ' + vndM(M.budget);
+  $('spendLeft').textContent = vndM(M.budget - M.used);
+  for (const k of M.lines) {
+    const a = el('article', 'card kpi');
+    const n = el('div', 'kpi-name', kpiName(k.buy)); n.appendChild(channelTag(k.channel)); a.appendChild(n);
+    a.appendChild(el('div', 'kpi-pct', pct(k.pct)));
+    a.appendChild(fillMeter(el('div', 'meter'), k.pct, RUN));
+    a.appendChild(el('div', 'kpi-of', int(k.results) + ' of ' + int(k.plan)));
+    a.appendChild(statusChip(k.status));
+    $('kpis').appendChild(a);
   }
-  for (const mo of MONTHS) {
-    const d = M.byMonth[mo];
-    const col = el('div', 'col'); col.tabIndex = 0; col.setAttribute('role', 'img');
-    col.setAttribute('aria-label', monthName(mo, true) + ': planned ' + int(d.budget) + ' VND, used ' + int(d.used) + ' VND');
-    col.appendChild(el('span', 'cap', vndCap(d.budget)));
-    const bar = el('div', 'bar'); bar.style.height = (d.budget / AX_MAX * 100) + '%';
-    if (d.used > 0) { const u = el('div', 'usedbar'); u.style.height = Math.min(100, ratio(d.used, d.budget)) + '%'; bar.appendChild(u); }
-    col.appendChild(bar);
-    bindTip(col, monthName(mo, true), ['Planned ' + int(d.budget) + ' ₫', 'Used ' + int(d.used) + ' ₫ (' + pct(ratio(d.used, d.budget)) + ')']);
-    $('cols').appendChild(col);
-    $('xaxis').appendChild(el('span', null, monthName(mo)));
-  }
+  [['Impressions', M.impr], ['Cumulative reach', M.reach], ['Views', M.views], ['Engagements', M.eng], ['Clicks', M.clicks]].forEach(([k, v]) => {
+    const d = el('div', 'card'); d.appendChild(el('span', 'k', k)); d.appendChild(el('span', 'v', compact(v))); $('impact').appendChild(d);
+  });
 
-  /* roadmap: content streams by month */
+  /* ---------- KPI & Budget ---------- */
   (function () {
-    const streams = [
-      { name: 'Social posts', sub: 'Facebook', pick: r => r.type === 'Social post' && r.channel === 'Facebook', label: r => r.post + ' · ' + r.product },
-      { name: 'GIF posts', sub: 'TikTok', pick: r => r.type === 'Social post' && r.channel === 'TikTok', label: r => r.post + ' · ' + r.product },
-      { name: 'HCP videos', sub: 'Facebook, TikTok', pick: r => r.type === 'HCP', label: r => 'Video ' + r.post },
-      { name: 'Livestream cut videos', sub: 'Facebook, TikTok', pick: r => r.type === 'Cut Video', label: r => 'Cut ' + r.post }
-    ];
-    const t = $('roadTable');
-    const hr = t.createTHead().insertRow();
-    hr.appendChild(el('th', '', 'Content'));
-    MONTHS.forEach(mo => hr.appendChild(el('th', mo === curMonth ? 'now' : '', monthName(mo, true))));
+    const nameCell = (cell, l) => { cell.textContent = kpiName(l.buy); cell.appendChild(channelTag(l.channel, 'l2')); };
+    const t = $('kpiTable'), hr = t.createTHead().insertRow();
+    [['KPI', ''], ['Committed', 'r'], ['Achieved', 'r'], ['Remaining', 'r'], ['% achieved', 'r'], ['Status', '']].forEach(([h, c]) => hr.appendChild(el('th', c, h)));
     const tb = t.createTBody();
-    const done = {}, all = {};
-    MONTHS.forEach(mo => { done[mo] = new Set(); all[mo] = new Set(); });
-    for (const s of streams) {
+    for (const k of M.lines) {
       const r = tb.insertRow();
-      const c0 = r.insertCell(); c0.textContent = s.name; c0.appendChild(el('span', 'l2', s.sub));
-      for (const mo of MONTHS) {
-        const cell = r.insertCell(); if (mo === curMonth) cell.className = 'now';
-        const items = new Map();
-        for (const row of M.rows) {
-          if (row.month !== mo || !s.pick(row)) continue;
-          const it = items.get(row.post) || { label: s.label(row), done: false };
-          if (row.actual && row.actual.impr > 0) it.done = true;
-          items.set(row.post, it);
-          all[mo].add(row.type + '|' + row.post);
-          if (it.done) done[mo].add(row.type + '|' + row.post);
-        }
-        if (!items.size) continue;
-        const box = el('div', 'rm-chips');
-        items.forEach(it => box.appendChild(el('span', 'rm-chip' + (it.done ? ' done' : ''), it.label)));
-        cell.appendChild(box);
+      nameCell(r.insertCell(), k);
+      [int(k.plan), int(k.results), int(Math.max(0, k.plan - k.results))].forEach(v => { const x = r.insertCell(); x.className = 'r'; x.textContent = v; });
+      pctCell(r.insertCell(), k.pct);
+      r.insertCell().appendChild(statusChip(k.status));
+    }
+    const b = $('budTable'), bh = b.createTHead().insertRow();
+    [['KPI', ''], ['Budget', 'r'], ['Used', 'r'], ['Remaining', 'r'], ['% used', 'r']].forEach(([h, c]) => bh.appendChild(el('th', c, h)));
+    const bb = b.createTBody();
+    for (const k of M.lines) {
+      const r = bb.insertRow();
+      nameCell(r.insertCell(), k);
+      [dong(k.budget), dong(k.used), dong(k.budget - k.used)].forEach(v => { const x = r.insertCell(); x.className = 'r'; x.textContent = v; });
+      pctCell(r.insertCell(), k.usedPct);
+    }
+    const f = b.createTFoot().insertRow();
+    f.insertCell().textContent = 'Total';
+    [dong(M.budget), dong(M.used), dong(M.budget - M.used)].forEach(v => { const x = f.insertCell(); x.className = 'r'; x.textContent = v; });
+    pctCell(f.insertCell(), M.spendPct);
+  })();
+
+  /* budget by month: planned track with the used part filled */
+  (function () {
+    const peak = Math.max.apply(null, M.months.map(mo => M.byMonth[mo].budget).concat([1]));
+    const step = peak > 240e6 ? 100e6 : peak > 120e6 ? 50e6 : peak > 60e6 ? 25e6 : 10e6;
+    const axMax = Math.ceil(peak / step) * step * 1.14;
+    for (let t = 0; t <= Math.ceil(peak / step) * step; t += step) {
+      const s = el('span', null, t / 1e6 + 'M'); s.style.bottom = (t / axMax * 100) + '%'; $('yaxis').appendChild(s);
+      if (t > 0) { const g = el('div', 'gridline'); g.style.bottom = (t / axMax * 100) + '%'; $('plot').insertBefore(g, $('cols')); }
+    }
+    for (const mo of M.months) {
+      const d = M.byMonth[mo];
+      const col = el('div', 'col'); col.tabIndex = 0; col.setAttribute('role', 'img');
+      col.setAttribute('aria-label', monthName(mo, true) + ': planned ' + int(d.budget) + ' VND, used ' + int(d.used) + ' VND');
+      col.appendChild(el('span', 'cap', vndCap(d.budget)));
+      const bar = el('div', 'bar'); bar.style.height = (d.budget / axMax * 100) + '%';
+      if (d.used > 0) { const u = el('div', 'usedbar'); u.style.height = Math.min(100, ratio(d.used, d.budget)) + '%'; bar.appendChild(u); }
+      col.appendChild(bar);
+      bindTip(col, monthName(mo, true), ['Planned ' + dong(d.budget), 'Used ' + dong(d.used) + ' (' + pct(ratio(d.used, d.budget)) + ')']);
+      $('cols').appendChild(col);
+      $('xaxis').appendChild(el('span', null, monthName(mo)));
+    }
+  })();
+
+  /* ---------- Detail: the working sheet ---------- */
+  (function () {
+    const ROW_STATUS = { met: 'KPI met', below: 'Below KPI', none: 'Not started' };
+    const rows = M.rows;
+    // [header, cell class, text for the page, value for Excel]
+    const COLS = [
+      ['Month', 'fz', r => monthName(r.month, true)], ['Post name', 'fz fz2', r => r.name],
+      ['Product', '', r => r.product], ['Channel', '', r => r.channel], ['Buying Type', '', r => r.buy], ['Link', 'link', r => r.link_url],
+      ['Plan KPI', 'r', r => int(r.plan), r => r.plan], ['%KPI Achieve', 'r strong heat', r => pct(r.pct), r => Math.round(r.pct * 10) / 10], ['Results', 'r', r => int(r.results), r => r.results],
+      ['Impr', 'r', r => int(r.impr), r => r.impr], ['Reach', 'r', r => int(r.reach), r => r.reach], ['Fre', 'r', r => r.fre == null ? '' : r.fre.toFixed(2), r => r.fre == null ? '' : Math.round(r.fre * 100) / 100],
+      ['Clicks (All)', 'r', r => int(r.clicks), r => r.clicks], ['Link Clicks', 'r', r => int(r.link), r => r.link], ['Views', 'r', r => int(r.views), r => r.views], ['Engagements', 'r', r => int(r.eng), r => r.eng]
+    ];
+    const t = $('sheet'), hr = t.createTHead().insertRow();
+    COLS.forEach(([h, c]) => hr.appendChild(el('th', c.replace(/ strong| heat|link/g, ''), h)));
+    const tb = t.createTBody();
+    const fill = (sel, allLabel, values, labelOf) => { sel.appendChild(new Option(allLabel, '')); values.forEach(v => sel.appendChild(new Option(labelOf ? labelOf(v) : v, v))); };
+    const uniq = key => Array.from(new Set(rows.map(r => r[key])));
+    fill($('fMonth'), 'All months', M.months, mo => monthName(mo, true));
+    fill($('fProduct'), 'All products', uniq('product'));
+    fill($('fChannel'), 'All channels', uniq('channel'));
+    fill($('fBuy'), 'All buying types', BUY_ORDER.filter(b => rows.some(r => r.buy === b)).concat(uniq('buy').filter(b => BUY_ORDER.indexOf(b) < 0)));
+    fill($('fStatus'), 'All statuses', Object.keys(ROW_STATUS), k => ROW_STATUS[k]);
+
+    /* %KPI colour: blue deepens toward 100%, green at 100%, darker green from 110% */
+    const LIGHT = [226, 238, 250], DEEP = [0, 94, 184], INK = [11, 26, 43], WHITE = [255, 255, 255];
+    const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+    const contrast = (a, b) => { const p = lum(a), q = lum(b); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
+    function heat(td, p) {
+      if (!(p > 0)) return;
+      const bg = p >= 110 ? [15, 107, 49] : p >= 100 ? [24, 138, 65] : LIGHT.map((v, i) => Math.round(v + (DEEP[i] - v) * Math.max(0, Math.min(1, p / 100))));
+      const fg = contrast(bg, WHITE) >= contrast(bg, INK) ? WHITE : INK;
+      td.style.background = 'rgb(' + bg.join(',') + ')'; td.style.color = 'rgb(' + fg.join(',') + ')';
+    }
+    let shown = rows;
+    function freeze() { const first = t.querySelector('thead th'); if (first) t.style.setProperty('--fz1', first.getBoundingClientRect().width + 'px'); }
+    function render() {
+      const f = { month: $('fMonth').value, product: $('fProduct').value, channel: $('fChannel').value, buy: $('fBuy').value, status: $('fStatus').value };
+      shown = rows.filter(r => Object.keys(f).every(k => !f[k] || r[k] === f[k]));
+      tb.textContent = '';
+      for (const r of shown) {
+        const tr = tb.insertRow();
+        COLS.forEach(([, c, get]) => {
+          const td = tr.insertCell(), v = get(r);
+          if (c === 'link') { if (v) { const a = el('a', null, 'View post'); a.href = v; a.target = '_blank'; a.rel = 'noopener'; td.appendChild(a); } return; }
+          td.className = c.replace(' heat', ''); td.textContent = v; if (c.indexOf('heat') >= 0) heat(td, r.pct);
+        });
       }
+      if (!shown.length) { const tr = tb.insertRow(); tr.className = 'empty'; const td = tr.insertCell(); td.colSpan = COLS.length; td.textContent = 'No rows match these filters'; }
+      freeze();
     }
-    const f = t.createTFoot().insertRow();
-    f.insertCell().textContent = 'Delivered';
-    MONTHS.forEach(mo => { const c = f.insertCell(); if (mo === curMonth) c.className = 'now'; c.textContent = done[mo].size + ' of ' + all[mo].size; });
+    ['fMonth', 'fProduct', 'fChannel', 'fBuy', 'fStatus'].forEach(id => $(id).addEventListener('change', render));
+    render();
+    onShow.detail = freeze;
+
+    /* export the rows currently shown */
+    const note = $('xNote');
+    $('xBtn').addEventListener('click', async () => {
+      const header = COLS.map(c => c[0] === '%KPI Achieve' ? '%KPI Achieve (%)' : c[0]);
+      const body = shown.map(r => COLS.map(c => (c[3] || c[2])(r)));
+      const blob = new Blob(xlsxParts(header, body), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const filename = 'IQ-ECG-campaign-detail.xlsx';
+      note.textContent = '';
+      if (window.claude && window.claude.use) {
+        let dl = null;
+        try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
+        if (!dl) { note.textContent = 'Export is not available in this view'; return; }
+        try { await dl.save({ filename, data: blob }); note.textContent = shown.length + ' rows exported'; }
+        catch (e) { note.textContent = e && e.code === 'declined' ? '' : e && e.code === 'rate_limited' ? 'A save prompt is already open' : 'Export is not available in this view'; }
+        return;
+      }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      note.textContent = shown.length + ' rows exported';
+    });
   })();
 
-  /* posts delivered */
-  (function () {
-    const t = $('postTable');
-    const hr = t.createTHead().insertRow();
-    [['Post', ''], ['Month', ''], ['Impression KPI', ''], ['Click KPI', ''], ['Reach', 'r'], ['CTR, click campaign', 'r'], ['Engagement rate', 'r'], ['', '']]
-      .forEach(([h, c]) => hr.appendChild(el('th', c, h)));
-    const tb = t.createTBody();
-    const kpiCell = (cell, row) => {
-      if (!row) return;
-      const box = el('div', 'kpicell');
-      box.appendChild(el('span', 'num', int(row.actual.results) + ' / ' + int(row.plan)));
-      pctCell(box, ratio(row.actual.results, row.plan), false);
-      cell.appendChild(box);
-    };
-    for (const p of M.posts) {
-      const link = POST_LINK[p.post], r = tb.insertRow();
-      const c0 = r.insertCell(); c0.textContent = 'Post ' + p.post + ' · ' + p.product; c0.appendChild(el('span', 'l2', p.format + ' image post'));
-      const cm = r.insertCell(); cm.textContent = monthName(p.month, true); cm.style.whiteSpace = 'nowrap';
-      kpiCell(r.insertCell(), p['Impression']); kpiCell(r.insertCell(), p['Click']);
-      const cr = r.insertCell(); cr.className = 'r'; cr.textContent = int(p.reach);
-      const cc = r.insertCell(); cc.className = 'r'; cc.textContent = p['Click'] && p['Click'].actual.impr ? pct(ratio(p['Click'].actual.clicks, p['Click'].actual.impr), 2) : '';
-      const ce = r.insertCell(); ce.className = 'r'; ce.textContent = pct(ratio(p.eng, p.impr), 2);
-      const cl = r.insertCell(); cl.style.whiteSpace = 'nowrap';
-      if (link) { const a = el('a', null, 'View post'); a.href = link; a.target = '_blank'; a.rel = 'noopener'; cl.appendChild(a); }
-    }
-  })();
-
-  /* month by month */
-  (function () {
-    const t = $('monthTable'), head = t.createTHead();
-    const g = head.insertRow(); g.className = 'group';
-    [['', 2, ''], ['Budget, VND', 2, 'edge'], ['Impressions', 2, 'edge'], ['Clicks', 2, 'edge'], ['ThruPlays', 2, 'edge'], ['2-second views', 2, 'edge']]
-      .forEach(([h, span, c]) => { const th = el('th', c, h); th.colSpan = span; g.appendChild(th); });
-    const hr = head.insertRow();
-    [['Month', ''], ['Content planned', ''], ['Planned', 'r edge'], ['Used', 'r'], ['KPI', 'r edge'], ['Achieved', 'r'], ['KPI', 'r edge'], ['Achieved', 'r'], ['KPI', 'r edge'], ['Achieved', 'r'], ['KPI', 'r edge'], ['Achieved', 'r']]
-      .forEach(([h, c]) => hr.appendChild(el('th', c, h)));
-    const tb = t.createTBody();
-    const order = ['Impression', 'Click', 'Thruplay', 'View 2s'];
-    for (const mo of MONTHS) {
-      const d = M.byMonth[mo], r = tb.insertRow();
-      r.insertCell().textContent = monthName(mo, true);
-      const parts = [], n = k => d.assets[k].size;
-      if (n('Social post')) parts.push(n('Social post') + ' posts');
-      if (n('HCP')) parts.push(n('HCP') + ' HCP videos');
-      if (n('Cut Video')) parts.push(n('Cut Video') + ' livestream cuts');
-      r.insertCell().textContent = parts.join(', ');
-      const started = mo <= curMonth;
-      const cells = [[int(d.budget), 'r edge'], [started ? int(d.used) : '', 'r']];
-      for (const b of order) { const x = d.buy[b]; cells.push([x.plan ? int(x.plan) : '', 'r edge'], [started && x.plan ? int(x.results) : '', 'r']); }
-      cells.forEach(([v, c]) => { const x = r.insertCell(); x.className = c; x.textContent = v; });
-    }
-    const f = t.createTFoot().insertRow();
-    f.insertCell().textContent = 'Total'; f.insertCell().textContent = M.assetsAll + ' posts and videos';
-    const cells = [[int(M.budget), 'r edge'], [int(M.used), 'r']];
-    for (const b of order) cells.push([int(M.byBuy[b].plan), 'r edge'], [int(M.byBuy[b].results), 'r']);
-    cells.forEach(([v, c]) => { const x = f.insertCell(); x.className = c; x.textContent = v; });
-  })();
-
-  /* by product, by audience */
-  function simpleTable(t, firstHead, items) {
-    const hr = t.createTHead().insertRow();
-    [[firstHead, ''], ['Impressions', 'r'], ['Reach', 'r'], ['Frequency', 'r'], ['Clicks', 'r'], ['CTR', 'r'], ['Engagements', 'r'], ['Eng. rate', 'r']].forEach(([h, c]) => hr.appendChild(el('th', c, h)));
-    const tb = t.createTBody();
-    for (const it of items) {
-      const r = tb.insertRow(); const c0 = r.insertCell(); c0.textContent = it.name; if (it.sub) c0.appendChild(el('span', 'l2', it.sub));
-      [int(it.impr), int(it.reach), it.reach ? (it.impr / it.reach).toFixed(2) : '', int(it.clicks), pct(ratio(it.clicks, it.impr), 2), int(it.eng), pct(ratio(it.eng, it.impr), 2)].forEach(v => { const c = r.insertCell(); c.className = 'r'; c.textContent = v; });
-    }
+  selectTab(currentTab) || selectTab('overall');
+  $('stamp').textContent = stamp || '';
   }
-  simpleTable($('prodTable'), 'Product', M.products.map(p => ({ name: p.product, sub: p.posts.size + (p.posts.size === 1 ? ' post' : ' posts'), impr: p.impr, reach: p.reach, clicks: p.clicks, eng: p.eng })));
-  simpleTable($('audTable'), 'Audience', ['User', 'Caregiver'].map(k => ({ name: k, impr: M.audiences[k].impr, reach: M.audiences[k].reach, clicks: M.audiences[k].clicks, eng: M.audiences[k].eng })));
+
+  const EMBEDDED = JSON.parse(document.getElementById('data').textContent);
+  render(EMBEDDED, DATA_URL ? 'Loading live data' : '');
+  if (DATA_URL) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
+    fetch(DATA_URL, { signal: ctl.signal }).then(r => r.json()).then(d => {
+      if (!d || d.error || !d.campaign || !Array.isArray(d.columns) || !Array.isArray(d.rows) || !Array.isArray(d.kpi)) throw new Error((d && d.error) || 'Unexpected data');
+      wrap.innerHTML = SHELL; render(d, 'Live data, updated ' + (d.updated || d.campaign.asOf));
+    }).catch(err => {
+      wrap.innerHTML = SHELL; render(EMBEDDED, 'Live data unavailable (' + (err && err.message || 'no answer') + '). Showing the snapshot of ' + EMBEDDED.campaign.asOf);
+    }).finally(() => clearTimeout(timer));
+  }
 })();
 </script>
 
-</body></html>
+</body>
+</html>
